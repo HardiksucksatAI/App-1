@@ -38,11 +38,19 @@ The unused Netlify deployment configuration and authentication bundle have been 
 
 ## Recent fixes
 
-- **Timer:** the length is locked once a session starts, so the minutes logged always match the session that ran. The countdown no longer finishes early, and pausing keeps the exact time left.
-- **Midnight rollover:** the dashboard moves to the new day by itself, even if it was left open overnight. Habits, focus sessions and the greeting follow the real date.
-- **Habit streaks:** a finished day is frozen with its own total, so adding or deleting habits later no longer changes past streaks. Deleted habits are not counted.
-- **Notes:** each note can now be edited (title, subject, text, and removing attached images or links). Deleting a note asks for confirmation.
+- **Note drafts:** new notes and inline edits survive switching tabs and refreshing the same browser tab. Drafts use session storage; use **Save note** or **Save changes** to keep them after closing the tab. Storage failures are reported without clearing the in-memory draft.
+- **Timer:** subject and duration stay fixed once a focus session starts, including while paused. Running and paused sessions survive refreshes. Completion and study-minute credit are saved together with a session ID to prevent duplicate credit on reload. Failed completion saves can be retried.
+- **Midnight rollover:** the dashboard updates the date, habits, study totals, and deadline labels when the day changes. Focus sessions count on their completion date.
+- **Habit streaks:** daily habit-ID snapshots preserve completed-day history when habits are added or removed. Existing frozen totals are retained. Older records without snapshots or totals use the active habit list once during migration; exact historical totals cannot be reconstructed.
+- **Notes:** edit a note inline, preserve or remove its attachments, and add new attachments or links. Deletion asks for confirmation and moves notes into **Deleted notes**, where they can be restored. Deleted notes are excluded from quizzes and included in backups.
+- **Quizzes:** multiple-choice alternatives come from the same note/chapter as the question. Chapters without three distinct wrong answers use flashcards instead of unrelated options.
+
+Older dashboard data, frozen streak totals, and the earlier independent timer format are migrated automatically. Restoring a backup pauses its timer rather than starting a countdown from another device.
+
+## Validation
+
+The reliability update passed 15 DOM-based regression scenarios covering drafts and edits, storage failures, deletion and restore, timer refresh/pause/completion, legacy migration, midnight rollover, streak history, quiz options, backup validation, and stale-tab protection.
 
 ## Known follow-up work
 
-Cloud sync between devices, Google Drive backup, and an automatic break timer are not built yet.
+Cloud sync between devices, Google Drive backup, and an automatic break timer are not built yet. Breaks start manually. Quiz alternatives are chapter-based; their educational quality and the built-in answers still need a separate content review.
