@@ -1157,7 +1157,22 @@ for(var i=2;i<arguments.length;i++)if(arguments[i])e.appendChild(arguments[i]);r
 var $=function(id){return document.getElementById(id)};
 var TD=dk(new Date());var GC={Routine:"#687653",Workout:"#B47B53",Food:"#678457",Study:"#8B7C89",Mine:"#638080"};var SC={MATH:"#AD7260",SCIENCE:"#678457",HINDI:"#AD8750",ENGLISH:"#718792","SOCIAL SCIENCE":"#8B7C89"};
 function doneToday(){return S.done[TD]||(S.done[TD]=[])}
-function pct(k){return S.habits.length?(S.done[k]||[]).length/S.habits.length:0}
+function pct(k){
+ var done=S.done[k]||[],frozen=S.tot&&S.tot[k]!==undefined&&k<TD;
+ if(frozen)return S.tot[k]?Math.min(1,done.length/S.tot[k]):0;
+ var ids=S.habits.map(function(h){return h.id}),n=done.filter(function(id){return ids.indexOf(id)>=0}).length;
+ return S.habits.length?Math.min(1,n/S.habits.length):0}
+function freezePast(){
+ S.tot=S.tot||{};var changed=false,ids=S.habits.map(function(h){return h.id});
+ Object.keys(S.done).forEach(function(k){
+  if(k>=TD||S.tot[k]!==undefined||!S.done[k].length)return;
+  S.done[k]=S.done[k].filter(function(id){return ids.indexOf(id)>=0});S.tot[k]=S.habits.length;changed=true});
+ if(changed)save()}
+var curTab="today";
+function rollover(){
+ var now=dk(new Date());
+ if(now!==TD){TD=now;freezePast();if(curTab==="today")renderToday()}
+ head()}
 function head(){
  var n=doneToday().filter(function(id){return S.habits.some(function(h){return h.id===id})}).length,t=S.habits.length;
  $("bar").style.width=(t?n/t*100:0)+"%";$("count").textContent=n+" of "+t+" done today";
@@ -1175,17 +1190,43 @@ function renderToday(){var r=$("today");r.textContent="";var gs=[];S.habits.forE
   r.appendChild(el("div",{class:"row"+(on?" done":"")},c,el("label",{for:"c"+h.id,text:h.t}),
    el("button",{class:"x","aria-label":"Remove "+h.t,text:"×",onclick:function(){S.habits=S.habits.filter(function(x){return x.id!==h.id});save();renderToday();head()}})))})});
  r.appendChild(el("h2",{text:"Add a habit"}));r.appendChild(addForm("New daily habit",function(t){S.habits.push({id:"h"+Date.now(),g:"Mine",t:t});save();renderToday();head()}))}
-var T={mode:"focus",end:0,left:25*60,id:null,len:25};
+var T={mode:"focus",end:0,left:25*60,dur:25*60,id:null,len:25};
 function fmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
 function subj(){var s=$("subj");return s?s.value:S.subjects[0]}
-function tick(){var l=Math.max(0,Math.round((T.end-Date.now())/1000));T.left=l;paint();if(l<=0){clearInterval(T.id);T.id=null;
- if(T.mode==="focus"){S.sessions.push({d:TD,s:T.subj,m:T.len});save();T.mode="break";T.left=300;paint();renderStudy(true)}else{T.mode="focus";T.left=T.len*60;paint()}}}
-function paint(){var t=$("time");if(t){t.textContent=fmt(T.left);var rp=$("rp");if(rp){var tot=T.mode==="focus"?T.len*60:300;rp.style.strokeDashoffset=339.3*(1-Math.min(1,T.left/tot));rp.style.stroke=T.mode==="focus"?"":"var(--ok)"}$("mode").textContent=T.mode==="focus"?"Focus time":"Break time";document.title=(T.id?fmt(T.left)+" · ":"")+"My Daily Dashboard"}}
-function startPause(){if(T.id){clearInterval(T.id);T.id=null}else{T.subj=subj();T.end=Date.now()+T.left*1000;T.id=setInterval(tick,500)}renderStudy(true)}
-function reset(){clearInterval(T.id);T.id=null;T.mode="focus";T.left=T.len*60;renderStudy(true)}
+var TKEY=KEY+"-timer";
+function saveTimer(){try{localStorage.setItem(TKEY,JSON.stringify({mode:T.mode,dur:T.dur,len:T.len,left:T.left,subj:T.subj||null,end:T.id?T.end:0}))}catch(e){}}
+function resetTimer(){clearInterval(T.id);T.id=null;T.mode="focus";T.dur=T.len*60;T.left=T.dur;saveTimer()}
+function loadTimer(){
+ try{
+  var r=JSON.parse(localStorage.getItem(TKEY)||"null");
+  if(!r||typeof r!=="object"||(r.mode!=="focus"&&r.mode!=="break"))return;
+  if(![r.dur,r.len,r.left,r.end].every(Number.isFinite)||[25,45,50].indexOf(r.len)<0||r.dur<=0||r.dur>3600)return;
+  T.mode=r.mode;T.len=r.len;T.dur=r.dur;T.left=Math.min(Math.max(0,Math.round(r.left)),T.dur);
+  T.subj=(typeof r.subj==="string"&&S.subjects.indexOf(r.subj)>=0)?r.subj:S.subjects[0];
+  if(r.end>0){
+   var rem=Math.ceil((r.end-Date.now())/1000);
+   if(rem>0){T.left=Math.min(rem,T.dur);T.end=r.end;T.id=setInterval(tick,250)}
+   else{
+    if(T.mode==="focus"){S.sessions.push({d:dk(new Date(r.end)),s:T.subj,m:Math.round(T.dur/60)});save();T.mode="break";T.dur=300;T.left=300}
+    else{T.mode="focus";T.dur=T.len*60;T.left=T.dur}
+    saveTimer()}}
+ }catch(e){}}
+function tick(){
+ var l=Math.max(0,Math.ceil((T.end-Date.now())/1000));T.left=l;paint();
+ if(l>0)return;
+ clearInterval(T.id);T.id=null;
+ if(T.mode==="focus"){S.sessions.push({d:TD,s:T.subj,m:Math.round(T.dur/60)});save();T.mode="break";T.dur=300;T.left=300}
+ else{T.mode="focus";T.dur=T.len*60;T.left=T.dur}
+ saveTimer();paint();renderStudy(true)}
+function paint(){var t=$("time");if(t){t.textContent=fmt(T.left);var rp=$("rp");if(rp){rp.style.strokeDashoffset=339.3*(1-Math.min(1,T.left/T.dur));rp.style.stroke=T.mode==="focus"?"":"var(--ok)"}$("mode").textContent=T.mode==="focus"?"Focus time":"Break time";document.title=(T.id?fmt(T.left)+" \u00b7 ":"")+"My Daily Dashboard"}}
+function startPause(){
+ if(T.id){T.left=Math.max(0,Math.ceil((T.end-Date.now())/1000));clearInterval(T.id);T.id=null}
+ else{T.subj=subj();T.end=Date.now()+T.left*1000;T.id=setInterval(tick,250)}
+ saveTimer();renderStudy(true)}
+function reset(){resetTimer();renderStudy(true)}
 function renderStudy(keep){var r=$("study");r.textContent="";
  var sel=el("select",{id:"subj","aria-label":"Subject"});S.subjects.forEach(function(s){sel.appendChild(el("option",{text:s}))});if(T.subj)sel.value=T.subj;
- var ln=el("select",{"aria-label":"Session length",onchange:function(e){T.len=+e.target.value;if(!T.id&&T.mode==="focus"){T.left=T.len*60;paint()}}});
+ var ln=el("select",{"aria-label":"Session length",onchange:function(e){T.len=+e.target.value;if(!T.id&&T.mode==="focus"){T.dur=T.len*60;T.left=T.dur;paint()}saveTimer()}});ln.disabled=!!T.id||T.left!==T.dur;
  [25,45,50].forEach(function(m){var o=el("option",{value:m,text:m+" min"});if(m===T.len)o.selected=true;ln.appendChild(o)});
  var rg=el("div",{class:"ringw"});rg.innerHTML='<svg viewBox="0 0 120 120" class="ring" aria-hidden="true"><circle class="rt" cx="60" cy="60" r="54"/><circle id="rp" class="rp" cx="60" cy="60" r="54"/></svg>';rg.appendChild(el("div",{class:"time",id:"time",role:"timer"}));
  r.appendChild(el("div",{class:"timer"},rg,el("div",{class:"mode",id:"mode"}),
@@ -1218,6 +1259,42 @@ function subjSel(){var s=el("select",{"aria-label":"Subject"});S.subjects.forEac
 function shrink(f,cb){var rd=new FileReader();rd.onerror=function(){cb(null)};rd.onload=function(){var im=new Image();im.onerror=function(){cb(null)};im.onload=function(){var k=Math.min(1,1000/Math.max(im.width,im.height)),cv=document.createElement("canvas");cv.width=Math.round(im.width*k);cv.height=Math.round(im.height*k);cv.getContext("2d").drawImage(im,0,0,cv.width,cv.height);cb(cv.toDataURL("image/jpeg",.7))};im.src=rd.result};rd.readAsDataURL(f)}
 function noteExtras(n){var d=el("div",{});(n.im||[]).forEach(function(u){d.appendChild(el("img",{src:u,alt:"Note image",style:"max-width:100%;border-radius:8px;margin:6px 0;display:block"}))});
  (n.lk||[]).forEach(function(l){d.appendChild(el("p",{},el("a",{href:l.u,target:"_blank",rel:"noopener noreferrer",text:l.t})))});return d}
+function noteBox(n){
+ var box=el("details",{style:"margin-left:14px;border-left:5px solid "+chCol(n)}),sum=el("summary",{}),body=el("div",{});
+ box.appendChild(sum);box.appendChild(body);
+ function view(){
+  body.textContent="";sum.textContent=n.t;
+  body.appendChild(el("pre",{text:n.b}));body.appendChild(noteExtras(n));
+  body.appendChild(el("div",{class:"add"},
+   el("button",{class:"btn",text:"Quiz me",onclick:function(){Q.src="n"+n.id;Q.st="setup";show("quiz")}}),
+   el("button",{class:"btn ghost",text:"Edit",onclick:edit}),
+   el("button",{class:"btn ghost",text:"Delete note",onclick:function(){
+    if(!confirm("Delete this note? This cannot be undone."))return;
+    S.notes=S.notes.filter(function(y){return y.id!==n.id});save();renderNotes()}})))}
+ function edit(){
+  body.textContent="";
+  var ts=subjSel(),ti=el("input",{type:"text","aria-label":"Note title"}),tb=el("textarea",{rows:10,"aria-label":"Note text"}),
+   im=(n.im||[]).slice(),lk=(n.lk||[]).slice(),att=el("div",{}),msg=el("p",{class:"sub"});
+  if(S.subjects.indexOf(n.s)<0)ts.appendChild(el("option",{text:n.s}));
+  ts.value=n.s;ti.value=n.t;tb.value=n.b;
+  function drawAtt(){att.textContent="";
+   im.forEach(function(u,i){att.appendChild(el("div",{class:"row"},el("img",{src:u,alt:"Note image",style:"height:48px;border-radius:6px"}),el("label",{text:"Image "+(i+1)}),
+    el("button",{class:"x","aria-label":"Remove image "+(i+1),text:"\u00d7",onclick:function(){im.splice(i,1);drawAtt()}})))});
+   lk.forEach(function(l,i){att.appendChild(el("div",{class:"row"},el("label",{text:l.t}),
+    el("button",{class:"x","aria-label":"Remove link "+l.t,text:"\u00d7",onclick:function(){lk.splice(i,1);drawAtt()}})))})}
+  drawAtt();
+  body.appendChild(el("div",{class:"add"},ts,ti));body.appendChild(tb);body.appendChild(att);
+  body.appendChild(el("div",{class:"add"},
+   el("button",{class:"btn",text:"Save changes",onclick:function(){
+    var cur=S.notes.filter(function(y){return y.id===n.id})[0];if(!cur)return;
+    var old={s:cur.s,t:cur.t,b:cur.b,im:cur.im,lk:cur.lk};
+    cur.s=ts.value;cur.t=ti.value.trim()||"Notes";cur.b=tb.value;cur.im=im;cur.lk=lk;
+    if(!save()){cur.s=old.s;cur.t=old.t;cur.b=old.b;cur.im=old.im;cur.lk=old.lk;msg.textContent="Not saved: browser storage is full or unavailable. Your edits are still here; download a backup, then try again.";return}
+    n=S.notes.filter(function(y){return y.id===n.id})[0]||cur;
+    if(n.s!==old.s)renderNotes();else view()}}),
+   el("button",{class:"btn ghost",text:"Cancel",onclick:view})));
+  body.appendChild(msg)}
+ view();return box}
 function renderNotes(){var r=$("notes");r.textContent="";r.appendChild(el("h2",{text:"Google Drive"}));
  Object.keys(FD).forEach(function(k){var f="target=_blank";r.appendChild(el("div",{class:"row"},el("label",{text:k}),
   el("a",{href:"https://drive.google.com/drive/folders/"+FD[k][0],target:"_blank",rel:"noopener noreferrer",text:"Folder"}),el("a",{href:"https://docs.google.com/document/d/"+FD[k][1]+"/edit",target:"_blank",rel:"noopener noreferrer",text:"Notes doc"})))});
@@ -1248,9 +1325,7 @@ function renderNotes(){var r=$("notes");r.textContent="";r.appendChild(el("h2",{
   if(!save()){msg.textContent="Not saved: browser storage is full. Try fewer or smaller images.";return}renderNotes()}})));
  var msg=el("p",{class:"sub"});r.appendChild(msg);
  if(!S.notes.length)r.appendChild(el("p",{class:"empty",text:"No notes yet. Your daily notes will appear here, newest first."}));
- var grp={};S.subjects.forEach(function(k){if(S.notes.some(function(n){return n.s===k})){grp[k]=el("details",{},el("summary",{text:k,style:"border-left:5px solid "+(SC[k]||"#7E8273")+";padding-left:8px"}));r.appendChild(grp[k])}});S.notes.forEach(function(n){var k=n.s||"Other";if(!grp[k]){grp[k]=el("details",{},el("summary",{text:k,style:"border-left:5px solid "+(SC[k]||"#7E8273")+";padding-left:8px"}));r.appendChild(grp[k])}grp[k].appendChild(el("details",{style:"margin-left:14px;border-left:5px solid "+chCol(n)},el("summary",{text:n.t}),el("pre",{text:n.b}),noteExtras(n),
-  el("div",{class:"add"},el("button",{class:"btn",text:"Quiz me",onclick:function(){Q.src="n"+n.id;Q.st="setup";show("quiz")}}),
-   el("button",{class:"btn ghost",text:"Delete note",onclick:function(){S.notes=S.notes.filter(function(y){return y!==n});save();renderNotes()}}))))})}
+ var grp={};S.subjects.forEach(function(k){if(S.notes.some(function(n){return n.s===k})){grp[k]=el("details",{},el("summary",{text:k,style:"border-left:5px solid "+(SC[k]||"#7E8273")+";padding-left:8px"}));r.appendChild(grp[k])}});S.notes.forEach(function(n){var k=n.s||"Other";if(!grp[k]){grp[k]=el("details",{},el("summary",{text:k,style:"border-left:5px solid "+(SC[k]||"#7E8273")+";padding-left:8px"}));r.appendChild(grp[k])}grp[k].appendChild(noteBox(n))})}
 var Q={n:10,src:"all",mode:"mc",use:"mc",pool:[],cards:[],opts:[],i:0,ok:0,miss:[],st:"setup",pick:null,rev:false};
 function shuf(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
 function srcNotes(){var s=Q.src;return s==="all"?S.notes:s.slice(0,2)==="s:"?S.notes.filter(function(n){return n.s===s.slice(2)}):S.notes.filter(function(n){return "n"+n.id===s})}
@@ -1289,7 +1364,7 @@ function renderQuiz(){var r=$("quiz");r.textContent="";
   if(Q.pick!==null)r.appendChild(el("button",{class:"btn",text:Q.i+1>=Q.cards.length?"See score":"Next question",onclick:nextQ}))}
  else if(!Q.rev){r.appendChild(el("button",{class:"btn big",text:"Tap to show answer",onclick:function(){Q.rev=true;renderQuiz()}}))}
  else{r.appendChild(el("p",{class:"fca",text:c.a}));r.appendChild(el("div",{class:"fcb"},el("button",{class:"btn big ok",text:"✓ I knew it",onclick:function(){Q.ok++;nextQ()}}),el("button",{class:"btn big no",text:"✗ Missed it",onclick:function(){Q.miss.push(c);nextQ()}})))}}
-function show(t){["today","study","board","notes","quiz"].forEach(function(x){$(x).hidden=x!==t});
+function show(t){curTab=t;["today","study","board","notes","quiz"].forEach(function(x){$(x).hidden=x!==t});
  document.querySelectorAll("nav button").forEach(function(b){b.setAttribute("aria-selected",b.dataset.t===t)});
  if(t==="today")renderToday();if(t==="study")renderStudy();if(t==="board")renderBoard();if(t==="notes")renderNotes();if(t==="quiz")renderQuiz()}
 document.querySelectorAll("nav button").forEach(function(b){b.addEventListener("click",function(){show(b.dataset.t)})});
@@ -1310,8 +1385,8 @@ async function restoreBackup(file){
   if(!confirm("Replace this browser's habits, notes, tasks and progress with this backup? Download a backup first if you want to keep the current data."))return;
   var nextRaw=JSON.stringify(next);
   // Write before changing the visible state. A failed write leaves it untouched.
-  localStorage.setItem(KEY,nextRaw);savedRaw=nextRaw;lastGood=nextRaw;S=next;saveBlocked=false;
-  clearInterval(T.id);T.id=null;T.mode="focus";T.left=T.len*60;Q.st="setup";
+  localStorage.setItem(KEY,nextRaw);savedRaw=nextRaw;lastGood=nextRaw;S=next;saveBlocked=false;freezePast();
+  resetTimer();Q.st="setup";
   statusMessage("Backup restored successfully. Saved on this browser only.");
   $("reload-data").hidden=true;head();show("today");
  }catch(e){statusMessage("Restore failed. Current dashboard was not replaced. "+e.message)}
@@ -1325,7 +1400,12 @@ window.addEventListener("storage",function(e){if(e.key===KEY||e.key===null){save
 window.addEventListener("beforeunload",function(e){if(storageMessage.indexOf("not saved")>=0){e.preventDefault();e.returnValue=""}});
 statusMessage(storageMessage||"Saved on this browser only. Cloud sync is not connected.");
 
+freezePast();
+loadTimer();
 head();show("today");
+setInterval(rollover,30000);
+document.addEventListener("visibilitychange",function(){if(!document.hidden)rollover()});
+window.addEventListener("focus",rollover);
 </script>
 </body>
 </html>

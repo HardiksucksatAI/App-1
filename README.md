@@ -36,6 +36,13 @@ The existing Drive folder and document links open study resources. Google Drive 
 
 The unused Netlify deployment configuration and authentication bundle have been removed. This repository has no Netlify dependency. Removing those files does not delete or disable the separately hosted old site.
 
+## Recent fixes
+
+- **Timer:** the length is locked once a session starts, so the minutes logged always match the session that ran. The countdown no longer finishes early, and pausing keeps the exact time left.
+- **Midnight rollover:** the dashboard moves to the new day by itself, even if it was left open overnight. Habits, focus sessions and the greeting follow the real date.
+- **Habit streaks:** a finished day is frozen with its own total, so adding or deleting habits later no longer changes past streaks. Deleted habits are not counted.
+- **Notes:** each note can now be edited (title, subject, text, and removing attached images or links). Deleting a note asks for confirmation.
+
 ## Known follow-up work
 
-Timer-duration accuracy, midnight date rollover, habit streak calculations, and note editing remain follow-up tasks.
+Cloud sync between devices, Google Drive backup, and an automatic break timer are not built yet.
