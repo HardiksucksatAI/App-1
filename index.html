@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>My Daily Dashboard</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap">
+<style>
+:root{--bg:#F5F2EB;--surface:#FFFDF8;--ink:#2D342C;--muted:#686C60;--line:#DCDDD1;--accent:#45634A;--on-accent:#FFFDF8;--ok:#50734C;--danger:#A14E3F;--on-danger:#FFFDF8;--hero-start:#3D5642;--hero-end:#596A4B;--hero-ink:#FFFDF8;--hero-muted:#E1E7D7;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#1D231E;--surface:#272F28;--ink:#EEECE2;--muted:#B7BEAE;--line:#414B3E;--accent:#B1C69C;--on-accent:#202A20;--ok:#A6C293;--danger:#E2A192;--on-danger:#30201B;--hero-start:#304836;--hero-end:#46573C;--hero-ink:#FFFDF8;--hero-muted:#E1E7D7}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#1D231E;--surface:#272F28;--ink:#EEECE2;--muted:#B7BEAE;--line:#414B3E;--accent:#B1C69C;--on-accent:#202A20;--ok:#A6C293;--danger:#E2A192;--on-danger:#30201B;--hero-start:#304836;--hero-end:#46573C;--hero-ink:#FFFDF8;--hero-muted:#E1E7D7}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Sora,system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:760px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:26px;margin:0;letter-spacing:-.02em}
+h2{font-size:16px;margin:26px 0 8px}
+.sub{color:var(--muted);margin:2px 0 0}
+.prog{margin:18px 0 6px;height:10px;background:var(--line);border-radius:5px;overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
+.stats{display:flex;justify-content:space-between;color:var(--muted);font-size:13px}
+nav{display:flex;gap:4px;margin:20px 0 6px;border-bottom:1px solid var(--line)}
+nav button{flex:1;padding:10px 4px;background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);font:600 15px Sora,system-ui,sans-serif;cursor:pointer}
+nav button[aria-selected=true]{color:var(--ink);border-color:var(--accent)}
+button,input,select{font:inherit;color:inherit}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.row label{flex:1;cursor:pointer}
+.row input[type=checkbox]{width:20px;height:20px;accent-color:var(--ok);flex:none}
+.row.done label{color:var(--muted);text-decoration:line-through}
+.x{background:none;border:0;color:var(--muted);cursor:pointer;font-size:18px;padding:2px 8px;border-radius:6px}
+.x:hover{color:var(--ink)}
+.add{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.add input,.add select{padding:9px 10px;border:1px solid var(--line);background:var(--surface);border-radius:8px;min-width:0}
+.add input[type=text]{flex:1;min-width:140px}
+.btn{padding:9px 16px;border:0;border-radius:8px;background:var(--accent);color:var(--on-accent);font-weight:600;cursor:pointer}
+.btn.ghost{background:none;border:1px solid var(--line);color:var(--ink)}
+.timer{text-align:center;padding:22px 0 10px}
+.time{font-size:68px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
+.mode{color:var(--muted);margin:6px 0 14px}
+.timer .add{justify-content:center}
+.chip{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:0 8px}
+.bars{display:flex;gap:8px;align-items:flex-end;height:90px;margin-top:8px}
+.bars div{flex:1;text-align:center;font-size:12px;color:var(--muted);display:flex;flex-direction:column;justify-content:flex-end;height:100%}
+.bars b{display:block;background:var(--accent);border-radius:4px 4px 0 0;min-height:2px;margin-bottom:4px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
+.col h3{font-size:14px;margin:0 0 6px;padding-bottom:6px;border-bottom:2px solid var(--ink)}
+.item{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:14px}
+.item.d span{color:var(--muted);text-decoration:line-through}
+.item .mv{display:flex;gap:2px;margin-top:4px}
+.item .mv button{background:none;border:0;color:var(--muted);cursor:pointer;padding:0 8px;font-size:16px}
+.empty{color:var(--muted);font-size:13px}
+nav button{font-size:13.5px;padding:10px 2px}
+textarea{width:100%;padding:10px;border:1px solid var(--line);background:var(--surface);border-radius:8px;font:inherit;margin-top:8px}
+details{border-bottom:1px solid var(--line);padding:8px 0}summary{cursor:pointer;font-weight:600}
+pre{white-space:pre-wrap;font:inherit;color:var(--muted);margin:8px 0}
+.chip.hot{color:var(--danger);border-color:var(--danger)}
+.qq{font-size:20px;margin:6px 0 10px}
+a{color:var(--accent)}
+.hero{background:linear-gradient(135deg,var(--hero-start),var(--hero-end));color:var(--hero-ink);margin:-20px -16px 0;padding:26px 20px 44px;border-radius:0 0 28px 28px}
+.hero h1{color:var(--hero-ink);font-size:28px}
+.hero .sub,.hero .stats{color:var(--hero-muted)}
+.hero .prog{background:rgba(255,255,255,.25);height:12px}
+.hero .prog i{background:var(--hero-ink)}
+nav{border:0;background:var(--surface);padding:5px;border-radius:18px;box-shadow:0 6px 20px rgba(45,52,44,.10);margin:-26px 4px 10px;position:relative;gap:2px}
+nav button{display:flex;flex-direction:column;align-items:center;border:0;border-radius:13px;padding:7px 2px;font-size:12px;line-height:1.3}
+nav button span{font-size:19px}
+nav button[aria-selected=true]{background:var(--accent);color:var(--on-accent)}
+h2{display:flex;align-items:center;gap:8px}
+h2::before{content:"";width:5px;height:16px;border-radius:3px;background:var(--c,var(--accent))}
+.qq::before{display:none}
+.row{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:6px}
+.row.done{background:color-mix(in srgb,var(--ok) 11%,var(--surface))}
+.chip{padding:1px 9px;border:1px solid var(--c,var(--line));background:color-mix(in srgb,var(--c,transparent) 16%,transparent);color:var(--ink)}
+.btn{border-radius:10px}.btn:active{transform:translateY(1px)}
+.ringw{position:relative;width:220px;height:220px;margin:0 auto}
+.ring{width:100%;height:100%}
+.ring circle{fill:none;stroke-width:8}
+.rt{stroke:var(--line)}
+.rp{stroke:var(--accent);stroke-linecap:round;stroke-dasharray:339.3;stroke-dashoffset:0;transform:rotate(-90deg);transform-origin:center;transition:stroke-dashoffset .5s linear}
+.ringw .time{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:46px}
+.col{background:color-mix(in srgb,var(--surface) 70%,transparent);padding:10px;border-radius:14px}
+.cols .col:nth-child(1) h3{border-color:#687653}.cols .col:nth-child(2) h3{border-color:#AD8750}.cols .col:nth-child(3) h3{border-color:#638080}.cols .col:nth-child(4) h3{border-color:#678457}
+details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0}
+details details{border-radius:10px;background:var(--bg)}
+.opt:hover{border-color:var(--accent)}
+.opt{font-size:17px;padding:16px}
+.fcq{display:block;font-size:26px;line-height:1.35;text-align:center;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:34px 18px;margin:10px 0}
+.fcq::before{display:none}
+.fca{font-size:24px;font-weight:700;text-align:center;color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface));border-radius:18px;padding:24px 16px;margin:6px 0 14px}
+.btn.big{display:block;width:100%;font-size:20px;padding:18px;border-radius:16px}
+.fcb{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn.ok{background:var(--ok);color:var(--on-accent)}
+.btn.no{background:var(--danger);color:var(--on-danger)}
+@media (prefers-reduced-motion:reduce){.rp{transition:none}}
+.opt{display:block;width:100%;text-align:left;padding:11px 12px;margin:6px 0;background:var(--surface);border:1px solid var(--line);border-radius:8px;cursor:pointer}
+.opt.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 15%,var(--surface))}
+.opt.bad{border-color:var(--danger);background:color-mix(in srgb,var(--danger) 15%,var(--surface))}
+@media (prefers-reduced-motion:reduce){.prog i{transition:none}}
+</style>
+</head>
+<body>
+<main>
+<header class="hero">
+<h1 id="greet">Today</h1>
+<p class="sub" id="date"></p>
+<div class="prog" role="progressbar" aria-label="Today’s habits"><i id="bar"></i></div>
+<div class="stats"><span id="count"></span><span id="streak"></span></div>
+</header>
+<nav role="tablist"><button role="tab" data-t="today"><span>✅</span>Today</button><button role="tab" data-t="study"><span>📚</span>Study</button><button role="tab" data-t="board"><span>🗂️</span>Board</button><button role="tab" data-t="notes"><span>📝</span>Notes</button><button role="tab" data-t="quiz"><span>🧠</span>Quiz</button></nav>
+<details id="data-tools"><summary>Data &amp; backup</summary>
+<p id="save-status" role="status" aria-live="polite">Saved on this browser only. Cloud sync is not connected.</p>
+<div class="add"><button class="btn" id="export-data">Download backup</button><button class="btn ghost" id="restore-data">Restore backup</button><button class="btn ghost" id="reload-data" hidden>Reload saved data</button></div>
+<input id="backup-file" type="file" accept=".json,application/json" hidden>
+<p class="sub">Keep a backup before clearing browser data or moving devices. Restore replaces this browser’s dashboard after confirmation.</p></details>
+<section id="today"></section>
+<section id="study" hidden></section>
+<section id="board" hidden></section>
+<section id="notes" hidden></section>
+<section id="quiz" hidden></section>
+</main>
+<script>
+var KEY="student-dash-v1";
+function dk(d){return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}
+var H=[["Routine","Wake up at 6:00 AM"],["Routine","Plan the day: top 3 things"],["Routine","In bed by 10:00 PM, screens off 9:30"],
+["Workout","Bodyweight strength (training days)"],["Workout","Mobility and stretching, 10 min"],
+["Food","3 meals and 1–2 snacks"],["Food","Protein in every meal"],["Food","Water through the day"],["Food","One extra calorie-dense snack"],
+["Study","2 focus sessions (25 min each)"],["Study","Review today’s notes, 10 min"],["Study","Quiz yourself from memory"]];
+var def={habits:H.map(function(h,i){return{id:"h"+i,g:h[0],t:h[1]}}),done:{},subjects:["MATH","SCIENCE","HINDI","ENGLISH","SOCIAL SCIENCE"],sessions:[],stasks:[],
+board:{Active:["Choose a starting niche","Plan Sunday meals and groceries"],"Waiting On":[],Someday:["Track workout progress","Sports training block"],Done:[]},notes:[],deadlines:[]};
+var S, savedRaw=null, saveBlocked=false, storageMessage="";
+function validState(x){
+ var obj=function(v){return v&&typeof v==="object"&&!Array.isArray(v)},str=function(v){return typeof v==="string"},id=function(v){return str(v)||Number.isFinite(v)},date=function(v){return str(v)&&/^\d{4}-\d{2}-\d{2}$/.test(v)},arr=function(v,f){return Array.isArray(v)&&v.every(f)};
+ return obj(x)&&arr(x.habits,function(h){return obj(h)&&id(h.id)&&str(h.g)&&str(h.t)})&&obj(x.done)&&Object.keys(x.done).every(function(k){return date(k)&&arr(x.done[k],id)})&&arr(x.subjects,str)&&x.subjects.length>0&&arr(x.sessions,function(v){return obj(v)&&date(v.d)&&str(v.s)&&Number.isFinite(v.m)&&v.m>=0})&&arr(x.stasks,function(v){return obj(v)&&id(v.id)&&str(v.t)&&str(v.s)})&&obj(x.board)&&['Active','Waiting On','Someday','Done'].every(function(k){return arr(x.board[k],str)})&&Object.keys(x.board).every(function(k){return arr(x.board[k],str)})&&arr(x.notes,function(n){return obj(n)&&id(n.id)&&str(n.s)&&str(n.t)&&str(n.b)&&(!n.im||arr(n.im,function(u){return str(u)&&/^data:image\/(jpeg|png|webp|gif);base64,/i.test(u)}))&&(!n.lk||arr(n.lk,function(l){return obj(l)&&str(l.t)&&str(l.u)&&/^https?:\/\//i.test(l.u)}))})&&arr(x.deadlines,function(v){return obj(v)&&id(v.id)&&date(v.d)&&str(v.t)&&str(v.s)});
+}
+try{
+ savedRaw=localStorage.getItem(KEY);
+ S=savedRaw?JSON.parse(savedRaw):null;
+ if(S!==null){S=Object.assign({},def,S);if(!validState(S))throw new Error('Invalid saved data')}
+}catch(e){saveBlocked=true;storageMessage="Saved data could not be loaded. It has not been overwritten. Download a backup before restoring a valid file.";S=null}
+S=Object.assign({},def,S||{});
+var lastGood=JSON.stringify(S);
+def.subjects.forEach(function(s){if(S.subjects.indexOf(s)<0)S.subjects.push(s)});
+var SEED=[["Chemical Reactions and Equations",`What is a chemical reaction? :: Substances change into new substances with different properties
+Signs that a reaction has happened :: Change in state, colour, gas evolved, temperature change
+Why must equations be balanced? :: Law of conservation of mass
+Combination reaction :: Two or more reactants form a single product
+Chemical name of quicklime :: Calcium oxide (CaO)
+Chemical name of slaked lime :: Calcium hydroxide, Ca(OH)2
+Exothermic reaction :: Heat is released along with the products
+Endothermic reaction :: Energy, usually heat, is absorbed
+Decomposition reaction :: One reactant breaks into two or more products
+Type of decomposition of AgCl in sunlight :: Photolytic, 2AgCl gives 2Ag + Cl2
+Displacement reaction :: A more reactive element displaces a less reactive one from its compound
+Iron nail in copper sulphate: colour change :: Blue solution turns light green, reddish-brown copper deposits
+Double displacement reaction :: Two compounds exchange ions
+Na2SO4 + BaCl2 forms which white precipitate? :: Barium sulphate, BaSO4
+Oxidation :: Gain of oxygen or loss of hydrogen
+Reduction :: Loss of oxygen or gain of hydrogen
+In CuO + H2 gives Cu + H2O, which is oxidised? :: Hydrogen
+Rusting of iron needs :: Air and moisture
+Rancidity :: Oxidation of fats and oils that changes smell and taste
+Gas used to flush packets of chips :: Nitrogen
+Galvanisation :: Coating iron with a thin layer of zinc`],
+["Acids, Bases and Salts",`Acid turns blue litmus :: Red
+Base turns red litmus :: Blue
+Gas released when acid reacts with a metal :: Hydrogen
+Test for hydrogen gas :: Burns with a pop sound
+Acid + metal carbonate gives :: Salt, carbon dioxide and water
+Test for carbon dioxide :: Turns lime water milky
+Neutralisation reaction :: Acid + base gives salt + water
+Ion common to all acids :: H+ (hydrogen ions)
+Ion common to all alkalis :: OH- (hydroxide ions)
+Range of the pH scale :: 0 to 14
+pH of a neutral solution :: 7
+Lower the pH, the stronger the :: Acid
+pH of human blood :: About 7.4
+Tooth decay starts when mouth pH falls below :: 5.5
+Milk of magnesia is used as :: An antacid (magnesium hydroxide)
+Products of the chlor-alkali process :: NaOH, Cl2 and H2
+Formula of baking soda :: NaHCO3
+Formula of washing soda :: Na2CO3.10H2O
+Formula of plaster of Paris :: CaSO4.1/2H2O
+Formula of gypsum :: CaSO4.2H2O
+Bleaching powder is made from :: Chlorine and dry slaked lime, CaOCl2
+Water of crystallisation in copper sulphate :: 5 molecules, CuSO4.5H2O`],
+["Metals and Non-metals",`Liquid metal at room temperature :: Mercury
+Liquid non-metal at room temperature :: Bromine
+Metals stored under kerosene :: Sodium, potassium, lithium
+Most reactive metal in the series :: Potassium
+Least reactive metals :: Gold and platinum
+Order of reactivity series :: K, Na, Ca, Mg, Al, Zn, Fe, Pb, H, Cu, Hg, Ag, Au
+Amphoteric oxide :: Reacts with both acids and bases, e.g. Al2O3 and ZnO
+How are ionic compounds formed? :: By transfer of electrons
+Properties of ionic compounds :: High melting points, conduct when molten or dissolved
+Ore :: Mineral from which a metal can be extracted profitably
+Gangue :: Impurities in an ore
+Roasting :: Heating a sulphide ore strongly in excess air
+Calcination :: Heating a carbonate ore in limited air
+Thermit reaction :: Fe2O3 + 2Al gives Al2O3 + 2Fe + heat, used to join rail tracks
+In electrolytic refining the anode is :: The impure metal
+In electrolytic refining the cathode is :: A thin strip of pure metal
+Alloy :: Homogeneous mixture of a metal with other metals or non-metals
+Brass is an alloy of :: Copper and zinc
+Bronze is an alloy of :: Copper and tin
+Solder is an alloy of :: Lead and tin
+Aqua regia ratio :: 3 parts conc. HCl to 1 part conc. HNO3
+Aqua regia dissolves :: Gold and platinum`],
+["Carbon and its Compounds",`Covalent bond :: Bond formed by sharing of electrons
+Valency of carbon :: 4
+Allotropes of carbon :: Diamond, graphite, fullerenes
+Shape of the C-60 fullerene :: Football
+Catenation :: Carbon bonding with other carbon atoms to form chains
+General formula of alkanes :: CnH2n+2
+General formula of alkenes :: CnH2n
+General formula of alkynes :: CnH2n-2
+Formula of propane :: C3H8
+Formula of butane :: C4H10
+Functional group of alcohols :: -OH
+Functional group of carboxylic acids :: -COOH
+Functional group of aldehydes :: -CHO
+Formula of ethanol :: C2H5OH
+Formula of ethanoic acid :: CH3COOH
+5 to 8 percent acetic acid in water is :: Vinegar
+Esterification :: Acid + alcohol with conc. H2SO4 gives a sweet-smelling ester
+Saponification :: Ester + NaOH gives alcohol and soap
+Soap molecule has :: Hydrophilic head and hydrophobic tail
+Structure formed by soap in water :: Micelle
+Soap in hard water forms :: Scum
+Homologous series members differ by :: CH2 unit
+Saturated hydrocarbons burn with :: Clean blue flame
+Unsaturated hydrocarbons burn with :: Sooty yellow flame
+Catalyst for hydrogenation of oils :: Nickel`],
+["Life Processes",`Autotrophic nutrition :: Organism makes its own food by photosynthesis
+Site of photosynthesis :: Chloroplast
+Pores for gas exchange in leaves :: Stomata
+Cells that open and close stomata :: Guard cells
+Enzyme in saliva :: Salivary amylase
+Enzyme that digests proteins in the stomach :: Pepsin
+What does HCl do in the stomach? :: Makes it acidic and activates pepsin
+Bile is made in the :: Liver
+Function of bile :: Emulsifies fats
+Site of nutrient absorption :: Small intestine (villi)
+End products of anaerobic respiration in yeast :: Ethanol and carbon dioxide
+Cause of muscle cramps :: Lactic acid from anaerobic respiration
+Energy currency of the cell :: ATP
+Site of gas exchange in lungs :: Alveoli
+Respiratory pigment in humans :: Haemoglobin
+Number of chambers in the human heart :: Four
+Blood vessel carrying blood away from the heart :: Artery
+Tissue that carries water in plants :: Xylem
+Tissue that carries food in plants :: Phloem
+Transport of food in plants is called :: Translocation
+Functional unit of the kidney :: Nephron
+Artificial kidney process :: Dialysis`],
+["Control and Coordination",`Structural and functional unit of the nervous system :: Neuron
+Part of neuron that receives signals :: Dendrite
+Part of neuron that carries impulses away :: Axon
+Gap between two neurons :: Synapse
+Reflex action :: Sudden involuntary response to a stimulus
+Path of a reflex action :: Reflex arc
+Centre for reflex actions :: Spinal cord
+Brain part that controls balance :: Cerebellum
+Brain part that controls involuntary actions like vomiting :: Medulla
+Thinking and memory centre :: Cerebrum (forebrain)
+Brain is protected by :: Skull, meninges and cerebrospinal fluid
+Hormone that promotes cell elongation in plants :: Auxin
+Hormone that promotes stem growth :: Gibberellin
+Hormone that promotes cell division :: Cytokinin
+Hormone that inhibits growth and causes wilting :: Abscisic acid
+Growth towards light :: Phototropism
+Growth in response to gravity :: Geotropism
+Hormone made by the thyroid :: Thyroxine
+Element needed to make thyroxine :: Iodine
+Deficiency of iodine causes :: Goitre
+Hormone that lowers blood sugar :: Insulin
+Hormone for fight or flight :: Adrenaline
+Master gland :: Pituitary`],
+["How do Organisms Reproduce?",`Reproduction creates variation by :: Slight errors in DNA copying
+Binary fission occurs in :: Amoeba
+Multiple fission occurs in :: Plasmodium
+Fragmentation occurs in :: Spirogyra
+Regeneration occurs in :: Planaria and Hydra
+Budding occurs in :: Hydra and yeast
+Spore formation occurs in :: Rhizopus
+Vegetative propagation methods :: Cutting, layering, grafting
+Leaf propagation example :: Bryophyllum
+Tissue culture :: Growing new plants from tissue in artificial medium
+Male part of a flower :: Stamen
+Female part of a flower :: Pistil
+Pollen is produced in the :: Anther
+Transfer of pollen to stigma :: Pollination
+Fusion of male and female gametes :: Fertilisation
+Hormone made by the testes :: Testosterone
+Fertilisation in humans takes place in the :: Fallopian tube
+Zygote is implanted in the :: Uterus
+Organ that nourishes the embryo :: Placenta
+Menstrual cycle length :: About 28 days
+Surgical method of contraception in males :: Vasectomy
+Surgical method of contraception in females :: Tubectomy
+Copper-T is a :: Contraceptive device (IUD)
+HIV-AIDS is caused by a :: Virus`],
+["Heredity and Evolution",`Father of genetics :: Gregor Mendel
+Plant used by Mendel :: Garden pea
+Phenotypic ratio of a monohybrid F2 cross :: 3 : 1
+Phenotypic ratio of a dihybrid F2 cross :: 9 : 3 : 3 : 1
+Trait that shows in a hybrid :: Dominant trait
+Genotype :: Genetic makeup of an organism
+Phenotype :: Observable characteristics
+Sex chromosomes in human females :: XX
+Sex chromosomes in human males :: XY
+Who decides the sex of a child? :: Father
+Number of chromosome pairs in humans :: 23
+Are acquired traits inherited? :: No
+Homologous organs :: Same basic structure, different function
+Example of homologous organs :: Forelimbs of human, bat and bird
+Analogous organs :: Different structure, same function
+Example of analogous organs :: Wings of a bat and a bird
+Fossils are used to study :: Evolutionary history
+Dating fossils uses :: Carbon dating
+Who proposed natural selection? :: Charles Darwin
+Formation of new species :: Speciation
+Random change in gene frequency :: Genetic drift`],
+["Light - Reflection and Refraction",`Law of reflection :: Angle of incidence equals angle of reflection
+Image in a plane mirror :: Virtual, erect, same size, laterally inverted
+Mirror that converges light :: Concave mirror
+Mirror that diverges light :: Convex mirror
+Focal length of a spherical mirror :: f = R/2
+Mirror formula :: 1/v + 1/u = 1/f
+Magnification of a mirror :: m = -v/u
+Mirror used in vehicle rear-view :: Convex
+Mirror used by dentists and in torches :: Concave
+Refraction :: Bending of light as it passes from one medium to another
+Snell's law :: sin i / sin r = constant
+Refractive index :: n = speed of light in vacuum / speed in medium
+Speed of light in vacuum :: 3 x 10^8 m/s
+Lens that converges light :: Convex lens
+Lens that diverges light :: Concave lens
+Lens formula :: 1/v - 1/u = 1/f
+Power of a lens :: P = 1/f
+Unit of power of a lens :: Dioptre
+Power of a convex lens is :: Positive
+Power of a concave lens is :: Negative
+Magnification of a lens :: m = v/u`],
+["Human Eye and Colourful World",`Part of the eye that gives it colour :: Iris
+Opening in the iris :: Pupil
+Image forms on the :: Retina
+Muscles that change lens shape :: Ciliary muscles
+Ability of the eye to adjust focal length :: Accommodation
+Near point of a normal eye :: 25 cm
+Far point of a normal eye :: Infinity
+Myopia :: Near-sightedness
+Lens used to correct myopia :: Concave lens
+Hypermetropia :: Far-sightedness
+Lens used to correct hypermetropia :: Convex lens
+Presbyopia is corrected using :: Bifocal lenses
+Cataract is :: Clouding of the eye lens
+Dispersion of light :: Splitting of white light into its colours
+Order of colours in the spectrum :: VIBGYOR
+Rainbow is formed by :: Dispersion, refraction and total internal reflection in water drops
+Twinkling of stars is caused by :: Atmospheric refraction
+Tyndall effect :: Scattering of light by colloidal particles
+Why the sky is blue :: Short wavelengths are scattered more
+Why danger signals are red :: Red light is scattered the least
+Why the sun looks red at sunrise :: Light travels a longer path and blue is scattered away`],
+["Electricity",`Electric current :: Rate of flow of charge, I = Q/t
+Unit of current :: Ampere
+Unit of charge :: Coulomb
+Potential difference :: Work done per unit charge, V = W/Q
+Unit of potential difference :: Volt
+Ohm's law :: V = IR
+Unit of resistance :: Ohm
+Resistance of a wire :: R = rho x l / A
+Unit of resistivity :: Ohm metre
+Resistors in series :: R = R1 + R2
+Resistors in parallel :: 1/R = 1/R1 + 1/R2
+Joule's law of heating :: H = I squared x R x t
+Electric power :: P = VI
+Unit of power :: Watt
+Commercial unit of energy :: Kilowatt-hour
+1 kWh equals :: 3.6 x 10^6 J
+Ammeter is connected in :: Series
+Voltmeter is connected in :: Parallel
+Fuse wire is made of :: Alloy with a low melting point
+Filament of a bulb is made of :: Tungsten
+Charge of an electron :: 1.6 x 10^-19 C`],
+["Magnetic Effects of Electric Current",`Who discovered the magnetic effect of current? :: Oersted
+Magnetic field lines go from :: North pole to south pole outside the magnet
+Two magnetic field lines :: Never intersect
+Crowded field lines show :: A stronger field
+Rule for field direction around a wire :: Right-hand thumb rule
+Field of a solenoid is like that of a :: Bar magnet
+Electromagnet core :: Soft iron
+Rule for force on a current-carrying conductor :: Fleming's left-hand rule
+Fleming's left-hand rule thumb shows :: Direction of force
+Fleming's left-hand rule forefinger shows :: Direction of magnetic field
+Fleming's left-hand rule middle finger shows :: Direction of current
+Electric motor converts :: Electrical energy to mechanical energy
+Part that reverses current in a motor :: Split-ring commutator
+Electromagnetic induction :: Current produced by a changing magnetic field
+Rule for direction of induced current :: Fleming's right-hand rule
+Electric generator converts :: Mechanical energy to electrical energy
+AC frequency in India :: 50 Hz
+Voltage of domestic supply in India :: 220 V
+Live wire colour :: Red
+Neutral wire colour :: Black
+Earth wire colour :: Green
+Purpose of the earth wire :: Prevents electric shocks
+Causes of overloading :: Too many appliances or a short circuit`],
+["Our Environment",`Ecosystem :: Biotic and abiotic components interacting together
+Producers :: Green plants that make food
+Decomposers :: Bacteria and fungi that break down waste
+Each step of a food chain :: Trophic level
+Energy passed to the next trophic level :: About 10 percent
+Flow of energy in an ecosystem is :: Unidirectional
+Interconnected food chains :: Food web
+Biological magnification :: Harmful chemicals build up along the food chain
+Biodegradable waste :: Broken down by living organisms
+Non-biodegradable waste example :: Plastic
+Ozone formula :: O3
+Ozone layer protects from :: Harmful ultraviolet rays
+Chemicals that damage the ozone layer :: CFCs
+First trophic level :: Producers`]];
+if(!S.seeded){SEED.forEach(function(x,i){S.notes.push({id:"seed"+(i+1),d:dk(new Date()),s:"SCIENCE",t:"Ch "+(i+1)+" "+x[0],b:x[1],im:[],lk:[]})});S.seeded=1;save()}
+function chCol(n){var m=n.t.match(/^Ch (\d+)/),k=m?+m[1]:0,p=n.t.split(":")[0];
+ if(n.s==="SCIENCE")return k<=4?"#B47B53":(k<=8||k===13)?"#678457":"#718792";
+ if(n.s==="MATH")return k===1?"#638080":k<=5?"#85816A":(k===6||k===10)?"#AD8750":k===7?"#608B7D":k<=9?"#AF7264":k<=12?"#7B9263":"#A7797F";
+ var c={History:"#A17D55",Geography:"#678457",Civics:"#718792",Economics:"#AD8750",Prose:"#A7797F",Poem:"#8B7C89",Story:"#638080",Grammar:"#B47B53",Sparsh:"#8B7C89",Sanchayan:"#638080"};return c[p]||SC[n.s]||"#7E8273"}
+var SEED2=[["MATH","Ch 1 Real Numbers",`Euclid's division lemma :: a = bq + r, where 0 <= r < b
+Euclid's division algorithm finds the :: HCF of two positive integers
+Fundamental Theorem of Arithmetic :: Every composite number is a product of primes in a unique way, apart from order
+HCF x LCM of two numbers equals :: Product of the two numbers
+HCF of 12 and 18 :: 6
+LCM of 12 and 18 :: 36
+Is the square root of 2 rational? :: No, it is irrational
+Sum of a rational and an irrational number is :: Irrational
+Decimal expansion of a rational number :: Terminating or non-terminating repeating
+Decimal expansion of an irrational number :: Non-terminating non-repeating
+p/q has a terminating decimal when q has prime factors only :: 2 and 5`],
+["MATH","Ch 2 Polynomials",`Degree of a polynomial :: Highest power of the variable
+Maximum number of zeroes of a degree n polynomial :: n
+Zero of a polynomial :: Value of x for which p(x) = 0
+Graph of a linear polynomial :: Straight line
+Graph of a quadratic polynomial :: Parabola
+Sum of zeroes of ax^2 + bx + c :: -b/a
+Product of zeroes of ax^2 + bx + c :: c/a
+Number of zeroes equals the number of times the graph cuts the :: x-axis
+Quadratic polynomial with zeroes p and q :: x^2 - (p + q)x + pq
+Sum of zeroes of ax^3 + bx^2 + cx + d :: -b/a
+Product of zeroes of ax^3 + bx^2 + cx + d :: -d/a
+Parabola opens upward when :: a > 0`],
+["MATH","Ch 3 Pair of Linear Equations in Two Variables",`Standard form of a pair of linear equations :: a1x + b1y + c1 = 0 and a2x + b2y + c2 = 0
+Unique solution when :: a1/a2 is not equal to b1/b2 (intersecting lines)
+No solution when :: a1/a2 = b1/b2 not equal to c1/c2 (parallel lines)
+Infinitely many solutions when :: a1/a2 = b1/b2 = c1/c2 (coincident lines)
+Consistent pair :: Has at least one solution
+Inconsistent pair :: Has no solution
+Algebraic methods :: Substitution, elimination, cross-multiplication
+Cross-multiplication: x = :: (b1c2 - b2c1) / (a1b2 - a2b1)
+Cross-multiplication: y = :: (c1a2 - c2a1) / (a1b2 - a2b1)`],
+["MATH","Ch 4 Quadratic Equations",`Standard form of a quadratic equation :: ax^2 + bx + c = 0, with a not equal to 0
+Discriminant :: D = b^2 - 4ac
+D > 0 means :: Two distinct real roots
+D = 0 means :: Two equal real roots
+D < 0 means :: No real roots
+Quadratic formula :: x = (-b ± sqrt(b^2 - 4ac)) / 2a
+Methods to solve :: Factorisation, completing the square, quadratic formula
+Maximum number of roots :: Two
+Sum of roots :: -b/a
+Product of roots :: c/a`],
+["MATH","Ch 5 Arithmetic Progressions",`nth term of an AP :: an = a + (n - 1)d
+Common difference :: d = a(n+1) - an
+Sum of first n terms :: Sn = n/2 [2a + (n - 1)d]
+Sum when the last term l is known :: Sn = n/2 (a + l)
+Sum of first n natural numbers :: n(n + 1)/2
+Sum of first n odd numbers :: n^2
+The nth term from sums :: an = Sn - S(n-1)
+Three terms a - d, a, a + d are in :: AP
+Is 2, 4, 6, 8 an AP? :: Yes, with d = 2`],
+["MATH","Ch 6 Triangles",`Similar triangles :: Equal corresponding angles and proportional corresponding sides
+Basic Proportionality Theorem (Thales) :: A line parallel to one side divides the other two sides in the same ratio
+Converse of BPT :: A line dividing two sides in the same ratio is parallel to the third side
+AA criterion :: Two equal angles make triangles similar
+SSS similarity :: Corresponding sides are proportional
+SAS similarity :: One equal angle with proportional sides including it
+Ratio of areas of similar triangles :: Ratio of the squares of corresponding sides
+Pythagoras theorem :: In a right triangle, hypotenuse^2 = sum of squares of the other two sides
+Converse of Pythagoras theorem :: If one side squared equals the sum of squares of the other two, the opposite angle is 90 degrees
+Is a triangle with sides 3, 4, 5 right-angled? :: Yes`],
+["MATH","Ch 7 Coordinate Geometry",`Distance formula :: sqrt((x2 - x1)^2 + (y2 - y1)^2)
+Distance of a point from the origin :: sqrt(x^2 + y^2)
+Section formula (internal, ratio m:n) :: ((m x2 + n x1)/(m + n), (m y2 + n y1)/(m + n))
+Midpoint formula :: ((x1 + x2)/2, (y1 + y2)/2)
+Area of a triangle :: 1/2 |x1(y2 - y3) + x2(y3 - y1) + x3(y1 - y2)|
+Three points are collinear when :: The area of the triangle is 0
+A point on the x-axis has y-coordinate :: 0
+A point on the y-axis has x-coordinate :: 0`],
+["MATH","Ch 8 Introduction to Trigonometry",`sin A :: Perpendicular / Hypotenuse
+cos A :: Base / Hypotenuse
+tan A :: Perpendicular / Base
+cosec A :: 1 / sin A
+sec A :: 1 / cos A
+cot A :: 1 / tan A
+sin^2 A + cos^2 A :: 1
+1 + tan^2 A :: sec^2 A
+1 + cot^2 A :: cosec^2 A
+sin 30 :: 1/2
+cos 60 :: 1/2
+sin 45 :: 1/sqrt2
+sin 60 :: sqrt3/2
+tan 45 :: 1
+tan 30 :: 1/sqrt3
+tan 60 :: sqrt3
+cos 0 :: 1
+sin(90 - A) :: cos A
+tan 90 :: Not defined`],
+["MATH","Ch 9 Some Applications of Trigonometry",`Line of sight :: Line from the eye to the object being viewed
+Angle of elevation :: Angle between the horizontal and the line of sight to an object above it
+Angle of depression :: Angle between the horizontal and the line of sight to an object below it
+Trig ratio used with height and base distance :: tan
+If the angle of elevation is 45 degrees, height equals :: Horizontal distance
+As you move closer to a tower, the angle of elevation :: Increases
+Angle of elevation from A to B equals angle of depression from B to A :: Yes, alternate angles`],
+["MATH","Ch 10 Circles",`Tangent :: A line touching the circle at exactly one point
+Secant :: A line cutting the circle at two points
+Tangent and radius at the point of contact :: Perpendicular
+Tangents from an external point :: Two, and equal in length
+Tangents at a point on a circle :: One
+Tangents from a point inside the circle :: None
+Line from the centre to an external point :: Bisects the angle between the two tangents
+Maximum parallel tangents in one direction :: Two`],
+["MATH","Ch 11 Areas Related to Circles",`Circumference :: 2 pi r
+Area of a circle :: pi r^2
+Length of an arc of angle theta :: (theta/360) x 2 pi r
+Area of a sector :: (theta/360) x pi r^2
+Area of a segment :: Area of sector - area of triangle
+Area of a ring :: pi (R^2 - r^2)
+Perimeter of a semicircle :: pi r + 2r
+Area of a quadrant :: pi r^2 / 4
+Distance covered in one wheel revolution :: Its circumference
+Number of revolutions :: Total distance / circumference`],
+["MATH","Ch 12 Surface Areas and Volumes",`Volume of a cone :: 1/3 pi r^2 h
+Curved surface area of a cone :: pi r l
+Slant height of a cone :: sqrt(r^2 + h^2)
+Total surface area of a cone :: pi r (l + r)
+Volume of a sphere :: 4/3 pi r^3
+Surface area of a sphere :: 4 pi r^2
+Volume of a hemisphere :: 2/3 pi r^3
+Curved surface area of a hemisphere :: 2 pi r^2
+Total surface area of a hemisphere :: 3 pi r^2
+Volume of a cylinder :: pi r^2 h
+Curved surface area of a cylinder :: 2 pi r h
+Volume of a frustum :: 1/3 pi h (r1^2 + r2^2 + r1 r2)
+When a solid is melted and recast, what stays the same? :: Its volume
+Volume of a combined solid :: Sum of volumes of its parts`],
+["MATH","Ch 13 Statistics",`Mean by direct method :: Sum of fx / sum of f
+Mean by assumed mean method :: a + (sum of fd / sum of f)
+Mean by step deviation method :: a + h (sum of fu / sum of f)
+Modal class :: Class with the highest frequency
+Mode formula :: l + [(f1 - f0) / (2f1 - f0 - f2)] x h
+Median class :: Class whose cumulative frequency is just above n/2
+Median formula :: l + [(n/2 - cf) / f] x h
+Empirical relation :: 3 Median = Mode + 2 Mean
+Less-than and more-than ogives meet at the :: Median
+Cumulative frequency :: Running total of frequencies`],
+["MATH","Ch 14 Probability",`Probability of an event :: Favourable outcomes / total outcomes
+Probability of a sure event :: 1
+Probability of an impossible event :: 0
+Range of probability :: 0 to 1
+P(E) + P(not E) :: 1
+Probability of a head on a coin toss :: 1/2
+Outcomes when a die is thrown :: 6
+Probability of an even number on a die :: 1/2
+Prime numbers on a die :: 2, 3 and 5
+Cards in a standard deck :: 52
+Red cards in a deck :: 26
+Face cards in a deck :: 12
+Outcomes when two coins are tossed :: 4 (HH, HT, TH, TT)
+Outcomes when two dice are thrown :: 36`],
+["HINDI","Sparsh: साखी (कबीर)",`साखी के रचयिता कौन हैं? :: कबीरदास
+साखी किसे कहते हैं? :: संत कवियों द्वारा रचित दोहे जिनमें शिक्षा और अनुभव का सार होता है
+कबीर के अनुसार मीठी वाणी का प्रभाव क्या है? :: मन का अहंकार मिटता है और औरों के साथ स्वयं को भी शीतलता मिलती है
+कस्तूरी कुंडल बसै से कबीर क्या समझाते हैं? :: ईश्वर हमारे भीतर ही है, उसे बाहर खोजना व्यर्थ है
+जब मैं था तब हरि नहीं का अर्थ :: अहंकार मिटने पर ही ईश्वर का साक्षात्कार होता है
+कबीर ने संसार को किस भाव से देखा? :: सुखिया संसार खाए और सोए, दुखिया दास कबीर जागे और रोए`],
+["HINDI","Sparsh: पद (मीरा)",`पद के रचयिता कौन हैं? :: मीराबाई
+मीरा किसकी भक्त थीं? :: श्रीकृष्ण (गिरधर नागर) की
+हरि आप हरो जन री भीर में किन भक्तों की रक्षा का उल्लेख है? :: द्रौपदी, प्रह्लाद और ऐरावत हाथी
+मीरा कृष्ण की चाकरी क्यों करना चाहती हैं? :: दर्शन पाने, स्मरण करने और भक्ति की जागीर पाने के लिए
+मीरा के पदों की भाषा :: राजस्थानी मिश्रित ब्रज भाषा`],
+["HINDI","Sparsh: मनुष्यता (मैथिलीशरण गुप्त)",`मनुष्यता कविता के कवि :: मैथिलीशरण गुप्त
+कवि के अनुसार सच्चा मनुष्य कौन है? :: जो दूसरों के लिए जीता और मरता है
+उदार व्यक्ति की कीर्ति कैसी होती है? :: सदा अमर रहती है
+कवि ने किन दानी पात्रों के उदाहरण दिए? :: रंतिदेव, दधीचि, उशीनर और कर्ण
+कवि क्या संदेश देते हैं? :: परस्पर सहयोग और भाईचारे से जीना चाहिए`],
+["HINDI","Sparsh: पर्वत प्रदेश में पावस (सुमित्रानंदन पंत)",`इस कविता के कवि :: सुमित्रानंदन पंत
+कवि को किस रूप में जाना जाता है? :: प्रकृति के सुकुमार कवि
+कविता में किस ऋतु का वर्णन है? :: वर्षा ऋतु
+पर्वत को किसकी उपमा दी गई है? :: करघनी के आकार का, जिसके दर्पण जैसे तालाब में अपना रूप निहारता है
+कविता में कौन सा अलंकार प्रमुख है? :: मानवीकरण`],
+["HINDI","Sparsh: तोप (वीरेन डंगवाल)",`तोप कविता के कवि :: वीरेन डंगवाल
+तोप कहाँ रखी है? :: कंपनी बाग में
+तोप का इतिहास किस घटना से जुड़ा है? :: 1857 के स्वतंत्रता संग्राम से
+कविता का संदेश :: कितनी भी शक्तिशाली चीज़ हो, एक दिन उसका अंत होता है
+तोप के मुँह में अंत में कौन खेलती है? :: चिड़ियाँ`],
+["HINDI","Sparsh: कर चले हम फ़िदा (कैफ़ी आज़मी)",`कविता के रचयिता :: कैफ़ी आज़मी
+यह गीत किस फ़िल्म का है? :: हक़ीक़त
+कविता किस पृष्ठभूमि पर लिखी गई? :: भारत-चीन युद्ध
+कविता में सैनिक किससे प्रेरित करते हैं? :: देश की रक्षा के लिए बलिदान देने की भावना जगाते हैं
+कविता का मूल संदेश :: देश के प्रति त्याग और कर्तव्य`],
+["HINDI","Sparsh: आत्मत्राण (रवींद्रनाथ टैगोर)",`आत्मत्राण के रचयिता :: रवींद्रनाथ टैगोर
+आत्मत्राण का अनुवाद किसने किया? :: हजारीप्रसाद द्विवेदी
+कवि ईश्वर से क्या माँगते हैं? :: विपदाओं से बचाना नहीं, बल्कि उनसे लड़ने की शक्ति
+कवि किस पर विश्वास बनाए रखना चाहते हैं? :: ईश्वर पर, दुख में भी
+कविता का मूल भाव :: आत्मबल और निर्भयता`],
+["HINDI","Sparsh: बड़े भाई साहब (प्रेमचंद)",`बड़े भाई साहब के लेखक :: प्रेमचंद
+बड़े भाई छोटे भाई से कितने साल बड़े थे? :: पाँच साल
+छोटे भाई का मन किसमें लगता था? :: खेल-कूद, कनकौए (पतंग) उड़ाने में
+बड़े भाई साहब बार-बार किसमें फेल होते थे? :: कक्षा की परीक्षा में
+बड़े भाई के अनुसार केवल पढ़ाई में क्या ज़रूरी नहीं है? :: रटना, जीवन का अनुभव ज़्यादा ज़रूरी है
+कहानी में बड़े भाई साहब किस रूप में देखे जाते हैं? :: जिम्मेदार अभिभावक की तरह`],
+["HINDI","Sparsh: डायरी का एक पन्ना (सीताराम सेकसरिया)",`डायरी का एक पन्ना के लेखक :: सीताराम सेकसरिया
+घटना किस शहर से संबंधित है? :: कलकत्ता (कोलकाता)
+किस दिन स्वतंत्रता दिवस मनाया गया? :: 26 जनवरी 1931
+जुलूस के दौरान किसे गिरफ्तार किया गया? :: सुभाष चंद्र बोस को
+कलकत्ता में लोगों में क्या उत्साह था? :: स्वतंत्रता दिवस मनाने का`],
+["HINDI","Sparsh: तताँरा-वामीरो कथा (लीलाधर मंडलोई)",`तताँरा-वामीरो कथा के लेखक :: लीलाधर मंडलोई
+कथा किस द्वीप समूह की है? :: अंडमान-निकोबार
+तताँरा कहाँ का रहने वाला था? :: पासा गाँव
+वामीरो कहाँ की थी? :: लपाती गाँव
+तताँरा ने क्रोध में क्या किया? :: तलवार धरती में गाड़ दी, जिससे द्वीप दो टुकड़ों में बँट गया
+कथा का संदेश :: प्रेम और एकता की बाधा बने रीति-रिवाजों का विरोध`],
+["HINDI","Sparsh: तीसरी कसम के शिल्पकार शैलेंद्र (प्रह्लाद अग्रवाल)",`लेखक :: प्रह्लाद अग्रवाल
+तीसरी कसम किसकी कहानी पर आधारित है? :: फणीश्वरनाथ रेणु की कहानी मारे गए गुलफ़ाम
+फ़िल्म में मुख्य कलाकार :: राज कपूर और वहीदा रहमान
+शैलेंद्र की भूमिका :: गीतकार और फ़िल्म के निर्माता
+फ़िल्म को क्या सम्मान मिला? :: राष्ट्रपति स्वर्ण पदक
+फ़िल्म की विशेषता :: सादगी, संवेदनशीलता और यथार्थ चित्रण`],
+["HINDI","Sparsh: अब कहाँ दूसरे के दुख से दुखी होने वाले (निदा फ़ाज़ली)",`इस पाठ के लेखक :: निदा फ़ाज़ली
+पाठ का मुख्य विषय :: प्रकृति और मनुष्य के सह-अस्तित्व तथा संवेदनशीलता
+लेखक के अनुसार पृथ्वी पर किसका अधिकार है? :: सभी जीवों का
+लेखक किस पर चिंता प्रकट करते हैं? :: मनुष्य की स्वार्थपरता और पर्यावरण विनाश पर
+संदेश :: दूसरों के दुख को समझना और सबके साथ मिलकर रहना`],
+["HINDI","Sparsh: पतझर में टूटी पत्तियाँ (रवींद्र केलेकर)",`पाठ के लेखक :: रवींद्र केलेकर
+पाठ के दो भाग :: गिन्नी का सोना और झेन की देन
+गिन्नी का सोना किसका प्रतीक है? :: व्यावहारिकता मिश्रित आदर्श
+शुद्ध सोना किसका प्रतीक है? :: शुद्ध आदर्श
+झेन की देन में किस जापानी रस्म का वर्णन है? :: टी-सेरेमनी (चा-नो-यू)
+टी-सेरेमनी का वातावरण कैसा होता है? :: शांत और तनावमुक्त`],
+["HINDI","Sparsh: कारतूस (हबीब तनवीर)",`कारतूस किस विधा की रचना है? :: एकांकी (नाटक)
+लेखक :: हबीब तनवीर
+कारतूस के मुख्य पात्र :: नवाब वज़ीर अली और लेफ़्टिनेंट
+वज़ीर अली किस बात के लिए प्रसिद्ध थे? :: अपनी वीरता और निडरता के लिए
+एकांकी की प्रमुख भावना :: देशभक्ति और साहस`],
+["HINDI","Sanchayan: हरिहर काका (मिथिलेश्वर)",`हरिहर काका के लेखक :: मिथिलेश्वर
+कहानी का मुख्य विषय :: रिश्तों में स्वार्थ और संपत्ति का लालच
+हरिहर काका की संपत्ति पर किसकी नज़र थी? :: उनके भाइयों और ठाकुरबारी के महंत की
+हरिहर काका कौन सा जीवन जी रहे थे? :: अकेलेपन और असुरक्षा का
+कहानी का संदेश :: बुढ़ापे में अपनों की उपेक्षा और स्वार्थी रिश्तों पर व्यंग्य`],
+["HINDI","Sanchayan: सपनों के-से दिन (गुरदयाल सिंह)",`लेखक :: गुरदयाल सिंह
+पाठ किस पर आधारित है? :: लेखक के बचपन और स्कूल के दिनों के संस्मरण
+लेखक के स्कूल का वातावरण कैसा था? :: डर और आनंद दोनों से भरा
+हेडमास्टर शर्मा जी के बारे में :: बाहर से कठोर, भीतर से संवेदनशील
+पाठ का भाव :: बचपन की मासूमियत और शिक्षा-व्यवस्था की झलक`],
+["HINDI","Sanchayan: टोपी शुक्ला (राही मासूम रज़ा)",`टोपी शुक्ला के लेखक :: राही मासूम रज़ा
+टोपी का असली नाम :: बलभद्र नारायण शुक्ला
+टोपी की दोस्ती किससे थी? :: इफ़्फ़न से
+कहानी का मुख्य संदेश :: हिंदू-मुस्लिम एकता और सांप्रदायिक सद्भाव
+टोपी नाम क्यों पड़ा? :: इफ़्फ़न की टोपी पहन लेने के कारण`],
+["HINDI","Grammar: व्याकरण",`रचना के आधार पर वाक्य के कितने भेद हैं? :: तीन: सरल, संयुक्त और मिश्र
+वाच्य के कितने भेद हैं? :: तीन: कर्तृवाच्य, कर्मवाच्य और भाववाच्य
+समास के भेद :: अव्ययीभाव, तत्पुरुष, कर्मधारय, द्विगु, द्वंद्व और बहुव्रीहि
+संधि के तीन भेद :: स्वर, व्यंजन और विसर्ग संधि
+अलंकार के भेद :: शब्दालंकार और अर्थालंकार
+अनुप्रास अलंकार :: एक ही वर्ण की बार-बार आवृत्ति
+उपमा अलंकार :: समान गुण के कारण दो वस्तुओं की तुलना
+मानवीकरण अलंकार :: निर्जीव में मानवीय भावों का आरोप
+अनेकार्थी शब्द :: जिनके एक से अधिक अर्थ होते हैं
+मुहावरा :: ऐसा वाक्यांश जो विशेष अर्थ देता है
+रस के कितने प्रकार माने जाते हैं? :: नौ
+औपचारिक पत्र किसे लिखा जाता है? :: प्रधानाचार्य, संपादक या अधिकारी को`],
+["ENGLISH","Prose: A Letter to God",`Who wrote the story A Letter to God? :: Gregorio Lopez y Fuentes
+What was Lencho's occupation? :: Farmer
+What destroyed Lencho's crop? :: A hailstorm
+Who did Lencho write to? :: God
+How much money did Lencho ask for? :: One hundred pesos
+How much did the postmaster send? :: Seventy pesos
+Why was Lencho angry at the end? :: He thought the post office employees had stolen the rest
+Theme of the story :: Faith and human kindness`],
+["ENGLISH","Prose: Nelson Mandela: Long Walk to Freedom",`Where was Mandela's inauguration held? :: The Union Buildings in Pretoria
+In which year did Mandela become president? :: 1994
+How many years did Mandela spend in prison? :: Twenty-seven
+What system did Mandela fight against? :: Apartheid
+Mandela won the Nobel Peace Prize with :: F. W. de Klerk
+Mandela says freedom has what two kinds? :: Being free of chains and respecting the freedom of others
+Who was the first black president of South Africa? :: Nelson Mandela`],
+["ENGLISH","Prose: Two Stories about Flying",`Who wrote His First Flight? :: Liam O'Flaherty
+Why was the young seagull afraid to fly? :: He lacked courage
+What tempted the seagull to fly? :: A piece of fish offered by his mother
+Who wrote The Black Aeroplane? :: Frederick Forsyth
+Where was the pilot flying from and to? :: From France to England
+What saved the pilot? :: A mysterious black aeroplane that guided him
+What did the air traffic controller say? :: There was no other plane in the sky`],
+["ENGLISH","Prose: From the Diary of Anne Frank",`Whom did Anne address her diary to? :: Kitty
+Why did Anne start writing a diary? :: She had no true friend to confide in
+Where was Anne's family in hiding? :: The Secret Annexe in Amsterdam
+Who was Anne Frank's sister? :: Margot
+Which year did Anne get the diary? :: 1942, on her thirteenth birthday
+What was the Frank family hiding from? :: Nazi persecution of Jews`],
+["ENGLISH","Prose: Glimpses of India",`Who wrote A Baker from Goa? :: Lucio Rodrigues
+What is a baker called in Goa? :: Pader
+What is Coorg also known as? :: Kodagu
+Coorg is in which state? :: Karnataka
+Coorg people are known for their :: Martial tradition and hospitality
+What is the Tea from Assam about? :: A train journey where Rajvir and Pranjol see tea gardens
+Pranjol's father was a :: Tea planter`],
+["ENGLISH","Prose: Mijbil the Otter",`Who wrote Mijbil the Otter? :: Gavin Maxwell
+What was the otter's name? :: Mijbil (Mij)
+From which place did Maxwell get the otter? :: The marshes of Iraq (Tigris)
+What did Mij love? :: Water and playing with a rubber ball
+Where did Maxwell take Mij? :: To London by air
+What was Mij found to be? :: A new species of otter, named Maxwell's otter`],
+["ENGLISH","Prose: Madam Rides the Bus",`Who is the main character? :: Valli, an eight-year-old girl
+What was Valli's big wish? :: To ride the bus
+Who did she sit near? :: The conductor
+What sight shocked her? :: A dead cow on the road
+How did Valli earn the bus fare? :: By saving small coins
+What did Valli learn? :: The world is not always beautiful`],
+["ENGLISH","Prose: The Sermon at Benares",`Who gave the Sermon at Benares? :: Gautama Buddha
+Who came to Buddha for help? :: Kisa Gotami
+What did she want? :: Medicine to revive her dead son
+What did Buddha ask her to bring? :: A mustard seed from a house where no one had died
+What did Kisa learn? :: Death is universal
+What is Buddha's message? :: Accept loss and overcome grief`],
+["ENGLISH","Prose: The Proposal",`Who wrote The Proposal? :: Anton Chekhov
+Who are the main characters? :: Lomov, Natalya and Chubukov
+Why did Lomov visit? :: To propose to Natalya
+What did Lomov and Natalya quarrel about? :: The ownership of Oxen Meadows
+What are the two dogs called? :: Guess and Squeezer
+How does the play end? :: They agree to marry despite arguing`],
+["ENGLISH","Poem: Dust of Snow, Fire and Ice",`Who wrote Dust of Snow? :: Robert Frost
+What shook down the dust of snow? :: A crow
+What is Fire and Ice about? :: Two ways the world might end
+Fire stands for :: Desire
+Ice stands for :: Hatred
+Who wrote Fire and Ice? :: Robert Frost`],
+["ENGLISH","Poem: A Tiger in the Zoo, How to Tell Wild Animals",`Who wrote A Tiger in the Zoo? :: Leslie Norris
+What is the tiger's free home? :: The jungle
+Who wrote How to Tell Wild Animals? :: Carolyn Wells
+How to Tell Wild Animals is what kind of poem? :: A humorous poem
+What is the theme of A Tiger in the Zoo? :: Animals suffer when kept in captivity`],
+["ENGLISH","Poem: The Ball Poem, Amanda!",`Who wrote The Ball Poem? :: John Berryman
+The Ball Poem is about a boy who :: Lost his ball in the water
+What does the boy learn? :: To cope with loss
+Who wrote Amanda!? :: Robin Klein
+Amanda! is a poem about :: A child told off by parents who dreams of freedom`],
+["ENGLISH","Poem: The Trees, Fog",`Who wrote The Trees? :: Adrienne Rich
+The trees in the poem want to :: Move out of the forest into freedom
+Who wrote Fog? :: Carl Sandburg
+In Fog, the fog is compared to :: A cat
+Fog comes on :: Little cat feet`],
+["ENGLISH","Poem: The Tale of Custard the Dragon, For Anne Gregory",`Who wrote The Tale of Custard the Dragon? :: Ogden Nash
+Who was the only brave one in the story? :: Custard the dragon
+Who wrote For Anne Gregory? :: W. B. Yeats
+What is the message of For Anne Gregory? :: Love should be for the person and not outward looks`],
+["ENGLISH","Story: A Triumph of Surgery, The Thief's Story",`Who wrote A Triumph of Surgery? :: James Herriot
+What was the dog's name? :: Tricki
+Tricki was ill because of :: Overfeeding
+Who wrote The Thief's Story? :: Ruskin Bond
+Who is the thief in the story? :: Hari Singh
+Who teaches Hari to read? :: Anil
+What happens at the end? :: Hari leaves without stealing`],
+["ENGLISH","Story: The Midnight Visitor, A Question of Trust",`Who wrote The Midnight Visitor? :: Robert Arthur
+Who is the secret agent? :: Ausable
+Who is the writer in the story? :: Fowler
+Who wrote A Question of Trust? :: Victor Canning
+Who is the thief in A Question of Trust? :: Horace Danby
+What was Horace's job? :: A locksmith and lock-maker`],
+["ENGLISH","Story: Footprints Without Feet, The Making of a Scientist",`Who wrote Footprints Without Feet? :: H. G. Wells
+Who is the main character? :: Griffin, the invisible man
+Who wrote The Making of a Scientist? :: Robert W. Peterson
+Who is the scientist in the story? :: Richard Ebright
+What did Richard collect as a child? :: Butterflies
+What helped Ebright's curiosity? :: His mother and his love for observation`],
+["ENGLISH","Story: The Necklace, Bholi, The Book That Saved the Earth",`Who wrote The Necklace? :: Guy de Maupassant
+Who is the main character of The Necklace? :: Mathilde Loisel
+Whose necklace did she borrow? :: Madame Forestier
+What was the real value of the necklace? :: It was an imitation worth much less
+Who wrote Bholi? :: K. A. Abbas
+What was Bholi's real name? :: Sulekha
+Who wrote The Book That Saved the Earth? :: Claire Boiko
+Which nursery rhyme book helped? :: Mother Goose`],
+["ENGLISH","Grammar: Grammar and Writing",`Determiners used with countable nouns :: A, an, the, few, many, these
+Which determiner suits uncountable nouns? :: Much, little, some
+Simple present is used for :: Habits and facts
+Present continuous is formed with :: is/am/are + verb-ing
+Past perfect is formed with :: had + past participle
+Modals that show ability :: Can, could
+Modal that shows obligation :: Must, should, have to
+Subject-verb concord: collective noun takes :: Singular verb as a group
+Reported speech: present tense changes to :: Past tense
+Reported speech: here changes to :: There
+Formal letter parts :: Sender's address, date, receiver, subject, salutation, body, subscription
+Analytical paragraph needs :: Facts, trend and a conclusion`],
+["SOCIAL SCIENCE","History: The Rise of Nationalism in Europe",`Year of the French Revolution :: 1789
+Congress of Vienna year :: 1815
+Who led the Congress of Vienna? :: Duke Metternich of Austria
+Who founded Young Italy? :: Giuseppe Mazzini
+Who led the Red Shirts? :: Giuseppe Garibaldi
+Who was the chief minister of Sardinia-Piedmont? :: Count Cavour
+Who unified Germany? :: Otto von Bismarck of Prussia
+Frankfurt Parliament year :: 1848
+Zollverein :: A customs union formed in 1834 to remove tariff barriers
+Napoleonic Code year :: 1804`],
+["SOCIAL SCIENCE","History: Nationalism in India",`Rowlatt Act year :: 1919
+Jallianwala Bagh massacre date :: 13 April 1919 in Amritsar
+Who ordered the firing at Jallianwala Bagh? :: General Dyer
+Khilafat movement leaders :: Muhammad Ali and Shaukat Ali
+Non-Cooperation Movement began :: 1920
+Why was the Non-Cooperation Movement called off? :: Violence at Chauri Chaura in 1922
+Salt March began from :: Sabarmati Ashram, 12 March 1930
+Salt March ended at :: Dandi
+Gandhi-Irwin Pact year :: 1931
+Poona Pact was between :: Gandhi and Ambedkar in 1932
+Purna Swaraj was declared at :: Lahore session, 1929
+Quit India Movement year :: 1942`],
+["SOCIAL SCIENCE","History: The Making of a Global World",`Silk Route :: Ancient trade routes linking Asia with Europe and North Africa
+Who reached the Americas in 1492? :: Christopher Columbus
+Irish Potato Famine years :: 1845 to 1849
+Britain abolished the Corn Laws in :: 1846
+Rinderpest in Africa began in :: 1890s
+Great Depression began in :: 1929
+Bretton Woods conference year :: 1944
+Institutions created at Bretton Woods :: IMF and World Bank
+Indentured labour :: Workers bound by contract to work for an employer
+Who introduced the assembly line? :: Henry Ford`],
+["SOCIAL SCIENCE","History: The Age of Industrialisation",`Where did the Industrial Revolution begin? :: Britain
+Spinning jenny invented by :: James Hargreaves, 1764
+Steam engine improved by :: James Watt
+Cotton mill set up by :: Richard Arkwright
+Proto-industrialisation :: Production for world markets before factories
+Gomastha :: Paid servant who supervised weavers in India
+First jute mill in India year :: 1855
+Tata Iron and Steel at Jamshedpur year :: 1912
+Which Indian muslin was famous abroad? :: Dhaka muslin
+Swadeshi movement boosted :: Indian industries`],
+["SOCIAL SCIENCE","History: Print Culture and the Modern World",`First printing technology came from :: China, Japan and Korea
+Marco Polo brought woodblock printing to :: Italy
+Gutenberg printing press year :: 1450s
+Gutenberg's first book :: Bible
+Martin Luther's Ninety-Five Theses year :: 1517
+Penny chapbooks were :: Cheap small books sold by pedlars
+Vernacular Press Act year :: 1878
+First press in India was set up in :: Goa, by Portuguese missionaries
+Raja Ram Mohan Roy's journal :: Sambad Kaumudi, 1821
+What did printing help spread? :: Ideas and the spirit of nationalism`],
+["SOCIAL SCIENCE","Geography: Resources and Development",`Renewable resources :: Can be replenished, e.g. wind and solar energy
+Most widespread soil in India :: Alluvial soil
+Regur soil :: Black soil, best for cotton
+Laterite soil suits :: Tea and coffee
+New alluvium :: Khadar
+Old alluvium :: Bhangar
+Earth Summit year and place :: 1992, Rio de Janeiro
+Agenda 21 :: Action plan for sustainable development
+Soil erosion by running water forms :: Gullies
+Contour ploughing prevents :: Soil erosion on slopes`],
+["SOCIAL SCIENCE","Geography: Forest and Wildlife Resources",`Project Tiger launched in :: 1973
+Wildlife Protection Act year :: 1972
+Chipko Movement is associated with :: Protecting trees in the Himalayas
+Joint Forest Management began in :: Odisha, 1988
+Beej Bachao Andolan took place in :: Tehri
+Sacred groves :: Forest patches protected for religious reasons
+IUCN category for species in danger of extinction :: Endangered
+Species found only in a particular area :: Endemic
+Indian cheetah status :: Extinct (declared)
+Biosphere reserves protect :: Natural habitats and biodiversity`],
+["SOCIAL SCIENCE","Geography: Water Resources",`Hydrological cycle :: Continuous movement of water on Earth
+Who called dams the temples of modern India? :: Jawaharlal Nehru
+Sardar Sarovar Dam is on :: Narmada
+Bhakra Nangal Dam is on :: Satluj
+Hirakud Dam is on :: Mahanadi
+Tankas are used in :: Rajasthan for rainwater storage
+Kul irrigation is from :: Himachal Pradesh
+Bamboo drip irrigation is used in :: Meghalaya
+Narmada Bachao Andolan is a :: Movement against the Sardar Sarovar dam
+Multipurpose river projects serve :: Irrigation, power, flood control`],
+["SOCIAL SCIENCE","Geography: Agriculture",`Kharif crops sown in :: June to July with monsoon
+Rabi crops sown in :: October to December
+Zaid crops grown in :: Summer
+Rice is a :: Kharif crop
+Wheat is a :: Rabi crop
+Golden fibre :: Jute
+Black soil is best for :: Cotton
+Two main plantation crops :: Tea and coffee
+Green Revolution increased production of :: Wheat and rice
+Operation Flood is associated with :: Milk production (White Revolution)`],
+["SOCIAL SCIENCE","Geography: Minerals and Energy Resources",`Best iron ore :: Magnetite
+Most important iron ore :: Hematite
+Bauxite is the ore of :: Aluminium
+Purest form of coal :: Anthracite
+Lowest rank of coal :: Peat
+Lignite found at :: Neyveli, Tamil Nadu
+Mumbai High is known for :: Petroleum
+Monazite sands of Kerala give :: Thorium
+Largest solar plant region mentioned :: Bhuj, Gujarat
+Wind energy centre :: Nagercoil, Tamil Nadu`],
+["SOCIAL SCIENCE","Geography: Manufacturing Industries",`Agro-based industries :: Cotton, jute, sugar
+Mineral-based industries :: Iron and steel, cement, aluminium
+First successful cotton mill year and place :: 1854, Mumbai
+TISCO plant located at :: Jamshedpur
+Bhilai steel plant is in :: Chhattisgarh
+Aluminium needs which ore? :: Bauxite
+IT hub of India :: Bengaluru
+Industries cause pollution of :: Air, water, land and noise
+Cement industry needs :: Limestone, silica, gypsum
+NTPC stands for :: National Thermal Power Corporation`],
+["SOCIAL SCIENCE","Geography: Lifelines of National Economy",`Golden Quadrilateral connects :: Delhi, Mumbai, Chennai and Kolkata
+Border Roads Organisation established :: 1960
+Longest national highway :: NH 44 (Srinagar to Kanyakumari)
+Railways network gauge types :: Broad, metre and narrow
+Kandla port is a :: Tidal port
+Largest natural harbour port :: Mumbai
+Deepest landlocked and well protected port :: Visakhapatnam
+Pawan Hans provides :: Helicopter services
+What carries crude oil and natural gas? :: Pipelines
+Trade between countries is called :: International trade`],
+["SOCIAL SCIENCE","Civics: Power Sharing",`Belgium's capital :: Brussels
+Belgium: majority language community :: Dutch (about 59 percent)
+Sri Lanka: majority community :: Sinhala (about 74 percent)
+Sri Lanka's Sinhala Only Act year :: 1956
+Horizontal power sharing :: Between organs of government
+Vertical power sharing :: Between governments at different levels
+Power shared among social groups :: Reserved constituencies
+Power sharing among parties :: Coalitions
+Why power sharing is good :: Reduces conflict and ensures stability
+Majoritarianism :: Rule by the majority ignoring minority needs`],
+["SOCIAL SCIENCE","Civics: Federalism",`Federalism :: Power divided between a central authority and its units
+Union List subjects :: Defence, foreign affairs
+State List subjects :: Police, agriculture
+Concurrent List subjects :: Education, forests
+Residuary subjects go to :: Union government
+India's linguistic states formed in :: 1956
+Official language of the Union :: Hindi
+Languages in the Eighth Schedule :: 22
+Panchayati Raj amendment :: 73rd Amendment, 1992
+Gram Sabha :: All adult voters of a village`],
+["SOCIAL SCIENCE","Civics: Gender, Religion and Caste",`Sexual division of labour :: Work divided between women and men
+Seats reserved for women in Panchayats :: One-third
+Women's reservation law passed in 2023 :: Nari Shakti Vandan Adhiniyam
+Communalism :: Using religion as a basis for politics
+Secular state :: Has no official religion
+Equal Wages Act ensures :: Equal pay for equal work
+Caste in politics :: Parties choose candidates and appeal by caste
+Feminist movements demand :: Equal rights for women
+Urbanisation weakens :: Caste hierarchies
+Who is a feminist? :: A person who believes in equal rights for men and women`],
+["SOCIAL SCIENCE","Civics: Political Parties",`Political party :: Group of people who contest elections to hold power
+Party functions :: Contest elections, make policies, form governments, act as opposition
+Anti-defection law came through :: 52nd Amendment, 1985
+Who recognises parties in India? :: Election Commission
+Multiparty system :: Many parties compete
+Challenges to parties :: Lack of internal democracy, dynastic succession, money and muscle power, no meaningful choice
+One-party system :: Only one party is allowed
+BSP founder :: Kanshi Ram
+National party :: Recognised in several states
+Coalition government :: Formed by several parties together`],
+["SOCIAL SCIENCE","Civics: Outcomes of Democracy",`Accountable government :: Responsible to the people
+Responsive government :: Responds to the needs of citizens
+Right to Information Act year :: 2005
+Democracy and economic growth :: Dictatorships grow slightly faster but democracies are not far behind
+Democracy and inequality :: Does not eliminate economic inequality
+Democracy provides :: Dignity and freedom
+Legitimate government :: Government people see as their own
+How does democracy handle conflict? :: Through accommodation of differences
+Right to Information helps :: Citizens ask for government documents
+Democracy lets citizens :: Correct mistakes`],
+["SOCIAL SCIENCE","Economics: Development",`Per capita income :: Total income divided by population
+HDI is prepared by :: UNDP
+In HDI, health is measured by :: Life expectancy
+In HDI, education is measured by :: Years of schooling
+IMR stands for :: Infant Mortality Rate
+State with high HDI mentioned :: Kerala
+Sustainable development :: Meeting present needs without harming future needs
+PDS stands for :: Public Distribution System
+Different people have :: Different developmental goals
+Net Attendance Ratio :: Share of school-age children attending school`],
+["SOCIAL SCIENCE","Economics: Sectors of the Indian Economy",`Primary sector :: Agriculture, mining, dairy
+Secondary sector :: Manufacturing
+Tertiary sector :: Services
+GDP :: Value of all final goods and services in a year
+Largest sector by GDP in India :: Tertiary
+Disguised unemployment :: More people than needed work on a task
+MGNREGA year :: 2005
+MGNREGA assures :: 100 days of work per year
+Organised sector :: Regular jobs and government registration
+Unorganised sector :: Irregular jobs and no protection`],
+["SOCIAL SCIENCE","Economics: Money and Credit",`Double coincidence of wants :: Both parties want what the other has
+Modern forms of money :: Currency and deposits
+Who issues currency notes in India? :: Reserve Bank of India
+Demand deposits :: Can be withdrawn on demand
+Collateral :: Asset pledged to get a loan
+Formal sector credit :: Banks and cooperatives
+Informal sector credit :: Moneylenders and traders
+Self Help Groups :: Small groups pooling savings for credit
+Terms of credit :: Interest rate, collateral, documents, repayment mode
+Reserve Bank supervises :: Banks`],
+["SOCIAL SCIENCE","Economics: Globalisation and the Indian Economy",`MNC :: Company owning production in more than one country
+India's liberalisation began in :: 1991
+Foreign investment :: Money spent by MNCs on assets in other countries
+Trade barriers :: Taxes or quotas on imports
+SEZ :: Special Economic Zone
+WTO :: World Trade Organization
+What integrates markets across countries? :: Foreign trade
+Outsourcing :: Getting work done by another company or country
+Who benefits most from globalisation? :: Skilled and educated people and large producers
+Fair globalisation means :: Benefits for all people`],
+["SOCIAL SCIENCE","Economics: Consumer Rights",`Consumer Protection Act year :: 2019
+Consumer rights include :: Safety, information, choice, redressal, representation, education
+Consumer courts levels :: District, State and National
+National Consumer Day :: 24 December
+ISI mark is for :: Industrial products
+AGMARK is for :: Agricultural products
+Hallmark is for :: Gold jewellery
+RTI Act year :: 2005
+Purpose of consumer movement :: Protect consumers from unfair trade
+Consumer awareness helps :: Avoid exploitation`]];
+if(!S.seeded2){SEED2.forEach(function(x,i){S.notes.push({id:"s2-"+(i+1),d:dk(new Date()),s:x[0],t:x[1],b:x[2],im:[],lk:[]})});S.seeded2=1;save()}
+var SEED3=[["ENGLISH","Story: Two Gentlemen of Verona (A. J. Cronin)",`Who wrote Two Gentlemen of Verona? :: A. J. Cronin
+Who are the two boys in the story? :: Nicola and Jacopo
+Where is the story set? :: Verona, Italy
+What jobs did the boys do? :: Sold newspapers, shone shoes and ran errands
+Why did they work so hard? :: To look after their sick sister Lucia
+What was Lucia suffering from? :: Tuberculosis
+Why is the story called Two Gentlemen of Verona? :: The boys showed true gentlemanly character through selfless sacrifice`],
+["ENGLISH","Story: Mrs. Packletide's Tiger (Saki)",`Who wrote Mrs. Packletide's Tiger? :: Saki (H. H. Munro)
+Why did Mrs. Packletide want to shoot a tiger? :: To outdo her rival Loona Bimberton
+What made Loona Bimberton famous? :: A flight in an aeroplane
+What kind of tiger did the villagers find? :: An old, weak tiger
+How did the tiger actually die? :: Of a heart attack caused by the gunshot noise
+Who blackmailed Mrs. Packletide? :: Her companion Miss Mebbin
+What did Miss Mebbin get? :: An expensive cottage
+The story satirises :: Vanity and social rivalry`],
+["ENGLISH","Story: The Letter (Dhumaketu)",`Who wrote The Letter? :: Dhumaketu
+Who is the old man in the story? :: Ali
+Who was Ali waiting to hear from? :: His daughter Miriam
+Where did Ali go every day? :: The post office
+How did the post office staff treat him? :: They mocked him as mad
+When did the postmaster understand Ali's pain? :: When he waited for news of his own sick daughter
+When did Miriam's letter arrive? :: After Ali had died
+Theme of the story :: Love, hope and empathy`],
+["ENGLISH","Story: A Shady Plot (James Reeves)",`Who wrote A Shady Plot? :: James Reeves
+Who is the writer in the story? :: John Hallock
+What problem does John have? :: He cannot think of a new ghost story
+Which ghost appears to him? :: Helen
+What does Helen ask him? :: To stop writing ghost stories
+Who is John's suspicious wife? :: Lavinia
+Which object is used to contact the ghosts? :: A Ouija board
+What kind of story is it? :: A humorous ghost story`],
+["ENGLISH","Story: Patol Babu, Film Star (Satyajit Ray)",`Who wrote Patol Babu, Film Star? :: Satyajit Ray
+What is Patol Babu's role in the film? :: A single word, Oh!
+What advice did he remember? :: No role is small
+How did he prepare? :: Practised saying the word in many ways
+What did he do after the shot? :: Left without waiting for payment
+Theme of the story :: Dedication, passion and self-respect`],
+["ENGLISH","Story: Virtually True (Paul Stewart)",`Who wrote Virtually True? :: Paul Stewart
+Who is Sebastian Shultz? :: A boy who was in a coma after an accident
+Where did the narrator meet Sebastian? :: Inside virtual reality games
+What did Sebastian ask for? :: Help to escape
+Which game finally saved him? :: Warzone
+What caused Sebastian's coma? :: A car accident
+Theme of the story :: The thin line between reality and technology`],
+["ENGLISH","Play: The Dear Departed (Stanley Houghton)",`Who wrote The Dear Departed? :: Stanley Houghton
+Who is the old man? :: Abel Merryweather
+Who are his daughters? :: Amelia and Elizabeth
+What did the daughters assume? :: That their father was dead
+What did they argue about? :: Dividing his belongings
+What did Abel do when he woke up? :: Rebuked them and planned to change his will
+Theme of the play :: Greed and family hypocrisy`],
+["ENGLISH","Play: Julius Caesar (William Shakespeare)",`Who wrote Julius Caesar? :: William Shakespeare
+On which date was Caesar killed? :: The Ides of March, 15 March
+Who led the conspiracy? :: Brutus and Cassius
+Who warned Caesar to beware the Ides of March? :: A soothsayer
+Who is Caesar's wife? :: Calpurnia
+Who turned the crowd against the conspirators? :: Mark Antony, through his speech
+How did Brutus die? :: He took his own life
+Theme of the play :: Ambition, betrayal and fate`],
+["ENGLISH","Poem: The Frog and the Nightingale (Vikram Seth)",`Who wrote The Frog and the Nightingale? :: Vikram Seth
+Who sang loudly and badly in the bog? :: The frog
+Who sang sweetly? :: The nightingale
+How did the frog trick the nightingale? :: By claiming she needed training, and charging for it
+What happened to the nightingale in the end? :: She strained her voice and died
+Moral of the poem :: Believe in yourself and beware of manipulative people`],
+["ENGLISH","Poem: Not Marble, Nor the Gilded Monuments (Shakespeare)",`Who wrote Sonnet 55? :: William Shakespeare
+What will outlive marble and gold monuments? :: Poetry
+What does the poet promise the person he writes about? :: Their memory will live on in his verse
+What destroys statues and buildings? :: Time, war and decay
+Theme of the sonnet :: The immortality of poetry`],
+["ENGLISH","Poem: Ozymandias (P. B. Shelley)",`Who wrote Ozymandias? :: Percy Bysshe Shelley
+Who tells the story in the poem? :: A traveller
+What does the traveller see in the desert? :: A broken statue with two legs and a half-buried head
+What does the statue's face show? :: Proud, cold command
+What is left of the great empire? :: Nothing but endless sand
+Theme of the poem :: The fleeting nature of power and pride`],
+["ENGLISH","Poem: The Rime of the Ancient Mariner (S. T. Coleridge)",`Who wrote The Rime of the Ancient Mariner? :: Samuel Taylor Coleridge
+Who listens to the Mariner's tale? :: A wedding guest
+What did the Mariner kill? :: An albatross
+What happened to the ship after that? :: The wind stopped and the crew suffered
+Who gambled for the Mariner's fate? :: Death and Life-in-Death
+What freed the Mariner from the curse? :: Blessing the sea creatures
+Moral of the poem :: Respect nature and all living things`],
+["ENGLISH","Poem: Snake (D. H. Lawrence)",`Who wrote Snake? :: D. H. Lawrence
+Where does the poet meet the snake? :: At a water trough on a hot day
+What does the poet's education tell him? :: To kill the snake
+What did he do at the end? :: Threw a log at it
+How did he feel afterwards? :: Regret and shame
+Which other poem's bird does he recall? :: The albatross from the Ancient Mariner
+Theme of the poem :: Instinct against social conditioning, and respect for nature`],
+["ENGLISH","Grammar: Grammar Topics (Code 101)",`Marks for Reading, Writing, Grammar, Literature :: 22, 22, 10 and 26 (plus 20 internal)
+Tenses :: Simple, continuous, perfect forms of past, present and future
+Modal verbs :: Can, could, may, might, must, should, ought to
+Subject-verb concord :: The verb agrees with its subject in number
+Reported speech: commands and requests :: Use told, asked or requested with to-infinitive
+Reported speech: questions :: Use asked or wanted to know, with statement order
+Reported speech: statements :: Say or tell, with tense and pronoun changes
+Noun clause :: A clause used as a noun, often starting with that or what
+Adverb clause :: A clause that acts as an adverb, e.g. of time or reason
+Relative clause :: A clause starting with who, which or that describing a noun
+Determiners :: Words like a, the, some, many, this, my before nouns
+Test types for grammar :: Gap filling, editing, omission, reordering, transformation`],
+["ENGLISH","Grammar: Writing Skills (Code 101)",`Writing formats in the exam :: Email to school authorities, factual description, formal letter
+Email to school authorities needs :: Subject, salutation, body, closing and sender's name
+Factual description of a person or object :: Facts about appearance, features and use
+Formal letter parts :: Sender's address, date, receiver, subject, salutation, body, close
+Formal salutation :: Sir or Madam
+Formal letter close :: Yours faithfully
+Sections of the paper :: A Reading, B Writing, C Grammar, D Literature
+Unseen passages in Reading :: Two`]];
+if(!S.seeded3){S.notes=S.notes.filter(function(n){return !(n.s==="ENGLISH"&&/^s2-/.test(String(n.id)))});SEED3.forEach(function(x,i){S.notes.push({id:"s3-"+(i+1),d:dk(new Date()),s:x[0],t:x[1],b:x[2],im:[],lk:[]})});S.seeded3=1;save()}
+var FD={"MATH":["1xkFAFVIsfL4H87gvsrHomTGDalg8vBvX","1H7jD8sCHgKg_2C32OwNS3tTC0ove7dJ9-lH2HtNLkEk"],"SCIENCE":["1--urflrs3x4zK-NEIW2EhAnCHdJgPwVd","1V-RFPiS2leGEb-R1_ydXYU8mp1hyifKAYTE3q3mK__g"],"HINDI":["1F2AzpRuwP8N063u6D4mgbRH1hJrud8X1","1Eib4_0gZw_0CbUS3jTSEMhaSD22Uic_evOuMeUvOnCk"],"ENGLISH":["1FF3MzxN-FUMvpaREtHmO3gGlvqtwHcRr","1Sxv_q4eU27BAc5voaQWf5LKTWlg2b2QyFS4_mJe8s1Y"],"SOCIAL SCIENCE":["1VOYivfKmYTq7PdXogR9ReqBYzrEOA-bL","13TD31dnYnuqrNYn1Hrmhm4qH353FzfjX7Goaw3nmOfE"]};
+function statusMessage(message){storageMessage=message;var box=document.getElementById("save-status");if(box)box.textContent=message;if(/not saved|failed|could not|another tab/i.test(message)){var panel=document.getElementById("data-tools");if(panel)panel.open=true}}
+function save(){
+ try{
+  if(saveBlocked)throw new Error('blocked');
+  if(localStorage.getItem(KEY)!==savedRaw){saveBlocked=true;throw new Error('conflict')}
+  var next=JSON.stringify(S);localStorage.setItem(KEY,next);savedRaw=next;lastGood=next;
+  statusMessage("Saved on this browser at "+new Date().toLocaleTimeString()+". Cloud sync is not connected.");return true;
+ }catch(e){
+  S=JSON.parse(lastGood);
+  statusMessage(saveBlocked?"Changes were not saved. Stored data is unreadable or changed in another tab. Download a backup, then reload or restore.":"Changes were not saved. Browser storage may be full or unavailable. Download a backup and free space before retrying.");
+  var reload=document.getElementById('reload-data');if(reload)reload.hidden=false;
+  return false;
+ }
+}
+function el(t,p){var e=document.createElement(t);p=p||{};for(var k in p){if(k==="text")e.textContent=p[k];else if(k.slice(0,2)==="on")e.addEventListener(k.slice(2),p[k]);else e.setAttribute(k,p[k])}
+for(var i=2;i<arguments.length;i++)if(arguments[i])e.appendChild(arguments[i]);return e}
+var $=function(id){return document.getElementById(id)};
+var TD=dk(new Date());var GC={Routine:"#687653",Workout:"#B47B53",Food:"#678457",Study:"#8B7C89",Mine:"#638080"};var SC={MATH:"#AD7260",SCIENCE:"#678457",HINDI:"#AD8750",ENGLISH:"#718792","SOCIAL SCIENCE":"#8B7C89"};
+function doneToday(){return S.done[TD]||(S.done[TD]=[])}
+function pct(k){return S.habits.length?(S.done[k]||[]).length/S.habits.length:0}
+function head(){
+ var n=doneToday().filter(function(id){return S.habits.some(function(h){return h.id===id})}).length,t=S.habits.length;
+ $("bar").style.width=(t?n/t*100:0)+"%";$("count").textContent=n+" of "+t+" done today";
+ var s=0;for(var i=0;i<400;i++){var d=new Date();d.setDate(d.getDate()-i);var p=pct(dk(d));if(p>=.7)s++;else if(i>0)break}
+ $("streak").textContent=s?s+(s===1?" day":" days")+" streak (70% or more)":"Finish 70% to start a streak";
+ var hr=new Date().getHours();$("greet").textContent=hr<12?"Good morning":hr<18?"Good afternoon":"Good evening";
+ $("date").textContent=new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});}
+function addForm(ph,cb,extra){var i=el("input",{type:"text",placeholder:ph,"aria-label":ph});
+ var f=el("div",{class:"add"},i,extra);var go=function(){if(i.value.trim()){cb(i.value.trim(),extra);i.value=""}};
+ f.appendChild(el("button",{class:"btn",text:"Add",onclick:go}));i.addEventListener("keydown",function(e){if(e.key==="Enter")go()});return f}
+function renderToday(){var r=$("today");r.textContent="";var gs=[];S.habits.forEach(function(h){if(gs.indexOf(h.g)<0)gs.push(h.g)});
+ gs.forEach(function(g){r.appendChild(el("h2",{text:g,style:"--c:"+(GC[g]||"#638080")}));S.habits.filter(function(h){return h.g===g}).forEach(function(h){
+  var on=doneToday().indexOf(h.id)>=0;
+  var c=el("input",{type:"checkbox",id:"c"+h.id,onchange:function(){var a=doneToday(),k=a.indexOf(h.id);if(k<0)a.push(h.id);else a.splice(k,1);save();renderToday();head()}});c.checked=on;
+  r.appendChild(el("div",{class:"row"+(on?" done":"")},c,el("label",{for:"c"+h.id,text:h.t}),
+   el("button",{class:"x","aria-label":"Remove "+h.t,text:"×",onclick:function(){S.habits=S.habits.filter(function(x){return x.id!==h.id});save();renderToday();head()}})))})});
+ r.appendChild(el("h2",{text:"Add a habit"}));r.appendChild(addForm("New daily habit",function(t){S.habits.push({id:"h"+Date.now(),g:"Mine",t:t});save();renderToday();head()}))}
+var T={mode:"focus",end:0,left:25*60,id:null,len:25};
+function fmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
+function subj(){var s=$("subj");return s?s.value:S.subjects[0]}
+function tick(){var l=Math.max(0,Math.round((T.end-Date.now())/1000));T.left=l;paint();if(l<=0){clearInterval(T.id);T.id=null;
+ if(T.mode==="focus"){S.sessions.push({d:TD,s:T.subj,m:T.len});save();T.mode="break";T.left=300;paint();renderStudy(true)}else{T.mode="focus";T.left=T.len*60;paint()}}}
+function paint(){var t=$("time");if(t){t.textContent=fmt(T.left);var rp=$("rp");if(rp){var tot=T.mode==="focus"?T.len*60:300;rp.style.strokeDashoffset=339.3*(1-Math.min(1,T.left/tot));rp.style.stroke=T.mode==="focus"?"":"var(--ok)"}$("mode").textContent=T.mode==="focus"?"Focus time":"Break time";document.title=(T.id?fmt(T.left)+" · ":"")+"My Daily Dashboard"}}
+function startPause(){if(T.id){clearInterval(T.id);T.id=null}else{T.subj=subj();T.end=Date.now()+T.left*1000;T.id=setInterval(tick,500)}renderStudy(true)}
+function reset(){clearInterval(T.id);T.id=null;T.mode="focus";T.left=T.len*60;renderStudy(true)}
+function renderStudy(keep){var r=$("study");r.textContent="";
+ var sel=el("select",{id:"subj","aria-label":"Subject"});S.subjects.forEach(function(s){sel.appendChild(el("option",{text:s}))});if(T.subj)sel.value=T.subj;
+ var ln=el("select",{"aria-label":"Session length",onchange:function(e){T.len=+e.target.value;if(!T.id&&T.mode==="focus"){T.left=T.len*60;paint()}}});
+ [25,45,50].forEach(function(m){var o=el("option",{value:m,text:m+" min"});if(m===T.len)o.selected=true;ln.appendChild(o)});
+ var rg=el("div",{class:"ringw"});rg.innerHTML='<svg viewBox="0 0 120 120" class="ring" aria-hidden="true"><circle class="rt" cx="60" cy="60" r="54"/><circle id="rp" class="rp" cx="60" cy="60" r="54"/></svg>';rg.appendChild(el("div",{class:"time",id:"time",role:"timer"}));
+ r.appendChild(el("div",{class:"timer"},rg,el("div",{class:"mode",id:"mode"}),
+  el("div",{class:"add"},sel,ln,el("button",{class:"btn",text:T.id?"Pause":"Start",onclick:startPause}),el("button",{class:"btn ghost",text:"Reset",onclick:reset}))));paint();
+ var mins=S.sessions.filter(function(x){return x.d===TD}).reduce(function(a,x){return a+x.m},0);
+ r.appendChild(el("h2",{text:"Focus time"}));r.appendChild(el("p",{class:"sub",text:"Today: "+mins+" min across "+S.sessions.filter(function(x){return x.d===TD}).length+" sessions"}));
+ var b=el("div",{class:"bars"}),mx=60;var days=[];
+ for(var i=6;i>=0;i--){var d=new Date();d.setDate(d.getDate()-i);var m=S.sessions.filter(function(x){return x.d===dk(d)}).reduce(function(a,x){return a+x.m},0);days.push([d,m]);mx=Math.max(mx,m)}
+ days.forEach(function(p){b.appendChild(el("div",{title:p[1]+" min"},el("b",{style:"height:"+(p[1]/mx*70)+"px"}),document.createTextNode(p[0].toLocaleDateString(undefined,{weekday:"narrow"}))))});r.appendChild(b);
+ var bySub={};S.sessions.forEach(function(x){if(x.d>=dk(days[0][0]))bySub[x.s]=(bySub[x.s]||0)+x.m});
+ var keys=Object.keys(bySub);if(keys.length)r.appendChild(el("p",{class:"sub",text:"This week: "+keys.map(function(k){return k+" "+bySub[k]+" min"}).join(", ")}));
+ r.appendChild(el("h2",{text:"Subjects"}));r.appendChild(addForm("Add a subject (e.g. Psychology)",function(s){if(S.subjects.indexOf(s)<0)S.subjects.push(s);save();renderStudy(true)}));
+ r.appendChild(el("h2",{text:"Study tasks"}));
+ if(!S.stasks.length)r.appendChild(el("p",{class:"empty",text:"No study tasks yet. Add an assignment, exam or reading."}));
+ S.stasks.forEach(function(t){var c=el("input",{type:"checkbox",id:"s"+t.id,onchange:function(){t.done=!t.done;save();renderStudy(true)}});c.checked=!!t.done;
+  r.appendChild(el("div",{class:"row"+(t.done?" done":"")},c,el("label",{for:"s"+t.id,text:t.t}),el("span",{class:"chip",style:"--c:"+(SC[t.s]||"#7E8273"),text:t.s}),
+   el("button",{class:"x","aria-label":"Delete task",text:"×",onclick:function(){S.stasks=S.stasks.filter(function(x){return x!==t});save();renderStudy(true)}})))});
+ var ts=el("select",{"aria-label":"Task subject"});S.subjects.forEach(function(s){ts.appendChild(el("option",{text:s}))});
+ r.appendChild(addForm("New study task",function(t,x){S.stasks.push({id:Date.now(),t:t,s:x.value,done:false});save();renderStudy(true)},ts))}
+function renderBoard(){var r=$("board");r.textContent="";var cols=Object.keys(S.board),g=el("div",{class:"cols"});r.appendChild(el("h2",{text:"Task board"}));
+ cols.forEach(function(c,ci){var col=el("div",{class:"col"},el("h3",{text:c+" ("+S.board[c].length+")"}));
+  S.board[c].forEach(function(t,ti){var mv=el("div",{class:"mv"});
+   var mk=function(lbl,to,aria){if(to<0||to>=cols.length)return;mv.appendChild(el("button",{"aria-label":aria,text:lbl,onclick:function(){S.board[c].splice(ti,1);S.board[cols[to]].push(t);save();renderBoard()}}))};
+   mk("‹",ci-1,"Move to "+cols[ci-1]);mk("›",ci+1,"Move to "+cols[ci+1]);
+   mv.appendChild(el("button",{"aria-label":"Delete",text:"×",onclick:function(){S.board[c].splice(ti,1);save();renderBoard()}}));
+   col.appendChild(el("div",{class:"item"+(c==="Done"?" d":"")},el("span",{text:t}),mv))});
+  if(!S.board[c].length)col.appendChild(el("p",{class:"empty",text:"Nothing here"}));g.appendChild(col)});
+ r.appendChild(g);r.appendChild(el("h2",{text:"Add to Active"}));r.appendChild(addForm("New task",function(t){S.board.Active.push(t);save();renderBoard()}))}
+function subjSel(){var s=el("select",{"aria-label":"Subject"});S.subjects.forEach(function(x){s.appendChild(el("option",{text:x}))});return s}
+function shrink(f,cb){var rd=new FileReader();rd.onerror=function(){cb(null)};rd.onload=function(){var im=new Image();im.onerror=function(){cb(null)};im.onload=function(){var k=Math.min(1,1000/Math.max(im.width,im.height)),cv=document.createElement("canvas");cv.width=Math.round(im.width*k);cv.height=Math.round(im.height*k);cv.getContext("2d").drawImage(im,0,0,cv.width,cv.height);cb(cv.toDataURL("image/jpeg",.7))};im.src=rd.result};rd.readAsDataURL(f)}
+function noteExtras(n){var d=el("div",{});(n.im||[]).forEach(function(u){d.appendChild(el("img",{src:u,alt:"Note image",style:"max-width:100%;border-radius:8px;margin:6px 0;display:block"}))});
+ (n.lk||[]).forEach(function(l){d.appendChild(el("p",{},el("a",{href:l.u,target:"_blank",rel:"noopener noreferrer",text:l.t})))});return d}
+function renderNotes(){var r=$("notes");r.textContent="";r.appendChild(el("h2",{text:"Google Drive"}));
+ Object.keys(FD).forEach(function(k){var f="target=_blank";r.appendChild(el("div",{class:"row"},el("label",{text:k}),
+  el("a",{href:"https://drive.google.com/drive/folders/"+FD[k][0],target:"_blank",rel:"noopener noreferrer",text:"Folder"}),el("a",{href:"https://docs.google.com/document/d/"+FD[k][1]+"/edit",target:"_blank",rel:"noopener noreferrer",text:"Notes doc"})))});
+ r.appendChild(el("h2",{text:"Deadlines"}));
+ var dl=S.deadlines.slice().sort(function(a,b){return (!!a.done-!!b.done)||(a.d<b.d?-1:1)});
+ if(!dl.length)r.appendChild(el("p",{class:"empty",text:"No deadlines yet. Add a test, assignment or exam date."}));
+ dl.forEach(function(x){var n=Math.round((new Date(x.d+"T00:00")-new Date(TD+"T00:00"))/864e5);
+  var lbl=x.done?"done":n<0?Math.abs(n)+" days overdue":n===0?"due today":n===1?"tomorrow":"in "+n+" days";
+  var c=el("input",{type:"checkbox",id:"d"+x.id,onchange:function(){x.done=!x.done;save();renderNotes()}});c.checked=!!x.done;
+  r.appendChild(el("div",{class:"row"+(x.done?" done":"")},c,el("label",{for:"d"+x.id,text:x.t}),el("span",{class:"chip"+(!x.done&&n<=1?" hot":""),style:"--c:"+(SC[x.s]||"#7E8273"),text:x.s+", "+lbl}),
+   el("button",{class:"x","aria-label":"Delete deadline",text:"×",onclick:function(){S.deadlines=S.deadlines.filter(function(y){return y!==x});save();renderNotes()}})))});
+ var dd=el("input",{type:"date","aria-label":"Due date"});dd.value=TD;
+ r.appendChild(addForm("New deadline",function(t,x){S.deadlines.push({id:Date.now(),t:t,d:x.querySelector("input").value||TD,s:x.querySelector("select").value});save();renderNotes()},el("span",{style:"display:contents"},dd,subjSel())));
+ r.appendChild(el("h2",{text:"Notes"}));
+ r.appendChild(el("p",{class:"sub",text:"Tip: write a fact as Question :: Answer, or put a [key word] in brackets. The Quiz tab turns those lines into questions."}));
+ var ns=subjSel(),nt=el("input",{type:"text",placeholder:"Title (e.g. Lecture 3)","aria-label":"Note title"}),
+  nb=el("textarea",{rows:6,placeholder:"What is classical conditioning? :: Learning by linking two stimuli\nThe [amygdala] processes fear.","aria-label":"Note text"});
+ r.appendChild(el("div",{class:"add"},ns,nt));r.appendChild(nb);
+ var pendingImages=0,pend=[],pm=el("span",{class:"sub"}),
+  fi=el("input",{type:"file",accept:"image/*",multiple:"multiple","aria-label":"Attach images",onchange:function(e){[].slice.call(e.target.files).forEach(function(f){pendingImages++;shrink(f,function(u){pendingImages--;if(u)pend.push(u);pm.textContent=pendingImages?"Preparing images…":pend.length+" image(s) attached"})})}}),
+  ll=el("input",{type:"text",placeholder:"Link title (e.g. Lecture slides)","aria-label":"Link title"}),lu=el("input",{type:"text",placeholder:"Link address, starting with https://","aria-label":"Link address"});
+ r.appendChild(el("div",{class:"add"},fi,pm));r.appendChild(el("div",{class:"add"},ll,lu));
+ r.appendChild(el("div",{class:"add"},el("button",{class:"btn",text:"Save note",onclick:function(){
+  if(pendingImages){msg.textContent="Please wait for images to finish preparing.";return}
+  var lk=[],u=lu.value.trim();if(u){if(!/^https?:\/\//i.test(u)){msg.textContent="Links need to start with http:// or https://";return}lk.push({u:u,t:ll.value.trim()||u})}
+  if(!nb.value.trim()&&!pend.length&&!lk.length)return;
+  S.notes.unshift({id:Date.now(),d:TD,s:ns.value,t:nt.value.trim()||"Notes",b:nb.value,im:pend,lk:lk});
+  if(!save()){msg.textContent="Not saved: browser storage is full. Try fewer or smaller images.";return}renderNotes()}})));
+ var msg=el("p",{class:"sub"});r.appendChild(msg);
+ if(!S.notes.length)r.appendChild(el("p",{class:"empty",text:"No notes yet. Your daily notes will appear here, newest first."}));
+ var grp={};S.subjects.forEach(function(k){if(S.notes.some(function(n){return n.s===k})){grp[k]=el("details",{},el("summary",{text:k,style:"border-left:5px solid "+(SC[k]||"#7E8273")+";padding-left:8px"}));r.appendChild(grp[k])}});S.notes.forEach(function(n){var k=n.s||"Other";if(!grp[k]){grp[k]=el("details",{},el("summary",{text:k,style:"border-left:5px solid "+(SC[k]||"#7E8273")+";padding-left:8px"}));r.appendChild(grp[k])}grp[k].appendChild(el("details",{style:"margin-left:14px;border-left:5px solid "+chCol(n)},el("summary",{text:n.t}),el("pre",{text:n.b}),noteExtras(n),
+  el("div",{class:"add"},el("button",{class:"btn",text:"Quiz me",onclick:function(){Q.src="n"+n.id;Q.st="setup";show("quiz")}}),
+   el("button",{class:"btn ghost",text:"Delete note",onclick:function(){S.notes=S.notes.filter(function(y){return y!==n});save();renderNotes()}}))))})}
+var Q={n:10,src:"all",mode:"mc",use:"mc",pool:[],cards:[],opts:[],i:0,ok:0,miss:[],st:"setup",pick:null,rev:false};
+function shuf(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+function srcNotes(){var s=Q.src;return s==="all"?S.notes:s.slice(0,2)==="s:"?S.notes.filter(function(n){return n.s===s.slice(2)}):S.notes.filter(function(n){return "n"+n.id===s})}
+function parse(ns){var c=[];ns.forEach(function(n){n.b.split("\n").forEach(function(l){l=l.trim();var k=l.indexOf("::");
+ if(k>0&&l.slice(k+2).trim())c.push({q:l.slice(0,k).trim(),a:l.slice(k+2).trim()});else{var m=l.match(/\[([^\]]+)\]/);if(m)c.push({q:l.replace(m[0],"_____"),a:m[1]})}})});return c}
+function setQ(){var c=Q.cards[Q.i];var ans=[];Q.pool.forEach(function(x){if(x.a!==c.a&&ans.indexOf(x.a)<0)ans.push(x.a)});Q.opts=shuf([c.a].concat(shuf(ans).slice(0,3)));Q.pick=null;Q.rev=false}
+function startQ(c,pool){Q.pool=pool;Q.cards=shuf(c).slice(0,Q.n||c.length);Q.i=0;Q.ok=0;Q.miss=[];Q.st="run";var u=[];pool.forEach(function(x){if(u.indexOf(x.a)<0)u.push(x.a)});Q.use=Q.mode==="mc"&&u.length>=3?"mc":"fc";setQ();renderQuiz()}
+function nextQ(){Q.i++;if(Q.i>=Q.cards.length)Q.st="end";else setQ();renderQuiz()}
+function renderQuiz(){var r=$("quiz");r.textContent="";
+ if(Q.st==="setup"){var all=parse(srcNotes());
+  var sj=Q.src==="all"?"":Q.src.slice(0,2)==="s:"?Q.src.slice(2):((S.notes.filter(function(n){return "n"+n.id===Q.src})[0]||{}).s||"");
+  var so=el("select",{"aria-label":"Subject",onchange:function(e){Q.src=e.target.value?"s:"+e.target.value:"all";renderQuiz()}});
+  so.appendChild(el("option",{value:"",text:"All subjects"}));
+  S.subjects.forEach(function(s){var o=el("option",{value:s,text:s});if(s===sj)o.selected=true;so.appendChild(o)});
+  var ch=el("select",{"aria-label":"Chapter",onchange:function(e){Q.src=e.target.value||"s:"+sj;renderQuiz()}});
+  ch.appendChild(el("option",{value:"",text:sj?"All of "+sj:"Pick a subject first"}));
+  S.notes.filter(function(n){return n.s===sj}).forEach(function(n){var o=el("option",{value:"n"+n.id,text:n.t});if("n"+n.id===Q.src)o.selected=true;ch.appendChild(o)});
+  if(!sj)ch.disabled=true;
+  var mo=el("select",{"aria-label":"Quiz type",onchange:function(e){Q.mode=e.target.value}});
+  [["mc","Multiple choice"],["fc","Flashcards"]].forEach(function(m){var o=el("option",{value:m[0],text:m[1]});if(Q.mode===m[0])o.selected=true;mo.appendChild(o)});
+  r.appendChild(el("h2",{text:"Quiz from your notes"}));var cn=el("select",{"aria-label":"Number of questions",onchange:function(e){Q.n=+e.target.value}});[[10,"10 questions"],[20,"20 questions"],[0,"All questions"]].forEach(function(m){var o=el("option",{value:m[0],text:m[1]});if(Q.n===m[0])o.selected=true;cn.appendChild(o)});
+  r.appendChild(el("div",{class:"add"},so,ch,mo,cn));
+  r.appendChild(el("p",{class:"sub",text:all.length?all.length+" questions found in these notes.":"No saved notes with questions yet. Save a note in the Notes tab, or paste notes below."}));
+  var go=el("button",{class:"btn",text:"Start quiz",onclick:function(){startQ(all,all)}});if(!all.length)go.disabled=true;r.appendChild(go);
+  r.appendChild(el("h2",{text:"Or paste notes for a quick quiz"}));
+  var qp=el("textarea",{rows:6,placeholder:"Paste lines like:\nWhat are reactants? :: Starting substances\nA [precipitate] is an insoluble solid.","aria-label":"Paste notes"});r.appendChild(qp);
+  r.appendChild(el("div",{class:"add"},el("button",{class:"btn",text:"Quiz me on this",onclick:function(){var c=parse([{b:qp.value}]);if(!c.length){qm.textContent="No questions found. Use Question :: Answer, or put a [key word] in brackets.";return}startQ(c,c)}})));
+  var qm=el("p",{class:"sub"});r.appendChild(qm);return}
+ if(Q.st==="end"){r.appendChild(el("h2",{text:"Score: "+Q.ok+" of "+Q.cards.length}));
+  if(Q.miss.length){r.appendChild(el("p",{class:"sub",text:"Review these:"}));Q.miss.forEach(function(c){r.appendChild(el("div",{class:"row"},el("label",{text:c.q+" → "+c.a})))})}
+  var b=el("div",{class:"add"});if(Q.miss.length)b.appendChild(el("button",{class:"btn",text:"Retry missed",onclick:function(){startQ(Q.miss,Q.pool)}}));
+  b.appendChild(el("button",{class:"btn ghost",text:"New quiz",onclick:function(){Q.st="setup";renderQuiz()}}));r.appendChild(b);return}
+ var c=Q.cards[Q.i];r.appendChild(el("p",{class:"sub",text:"Question "+(Q.i+1)+" of "+Q.cards.length}));r.appendChild(el("h2",{class:"qq"+(Q.use==="fc"?" fcq":""),text:c.q}));
+ if(Q.use==="mc"){Q.opts.forEach(function(o){var k="opt"+(Q.pick!==null?(o===c.a?" ok":o===Q.pick?" bad":""):"");
+  r.appendChild(el("button",{class:k,text:o,onclick:function(){if(Q.pick!==null)return;Q.pick=o;if(o===c.a)Q.ok++;else Q.miss.push(c);renderQuiz()}}))});
+  if(Q.pick!==null)r.appendChild(el("button",{class:"btn",text:Q.i+1>=Q.cards.length?"See score":"Next question",onclick:nextQ}))}
+ else if(!Q.rev){r.appendChild(el("button",{class:"btn big",text:"Tap to show answer",onclick:function(){Q.rev=true;renderQuiz()}}))}
+ else{r.appendChild(el("p",{class:"fca",text:c.a}));r.appendChild(el("div",{class:"fcb"},el("button",{class:"btn big ok",text:"✓ I knew it",onclick:function(){Q.ok++;nextQ()}}),el("button",{class:"btn big no",text:"✗ Missed it",onclick:function(){Q.miss.push(c);nextQ()}})))}}
+function show(t){["today","study","board","notes","quiz"].forEach(function(x){$(x).hidden=x!==t});
+ document.querySelectorAll("nav button").forEach(function(b){b.setAttribute("aria-selected",b.dataset.t===t)});
+ if(t==="today")renderToday();if(t==="study")renderStudy();if(t==="board")renderBoard();if(t==="notes")renderNotes();if(t==="quiz")renderQuiz()}
+document.querySelectorAll("nav button").forEach(function(b){b.addEventListener("click",function(){show(b.dataset.t)})});
+
+function downloadBackup(){
+ var raw=saveBlocked&&savedRaw!==null?savedRaw:JSON.stringify({format:"daily-dashboard-backup",version:1,exportedAt:new Date().toISOString(),data:S},null,2);
+ var url=URL.createObjectURL(new Blob([raw],{type:"application/json"})),a=el("a",{href:url,download:"daily-dashboard-"+dk(new Date())+".json"});
+ document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},1000);
+}
+async function restoreBackup(file){
+ if(!file)return;
+ try{
+  if(file.size>20*1024*1024)throw new Error("Backup is too large (maximum 20 MB).");
+  var parsed=JSON.parse(await file.text());
+  if(parsed.format&&!(parsed.format==="daily-dashboard-backup"&&parsed.version===1))throw new Error("Unsupported backup format.");
+  var next=parsed.format?parsed.data:parsed;
+  if(!validState(next))throw new Error("This file is not a valid dashboard backup.");
+  if(!confirm("Replace this browser's habits, notes, tasks and progress with this backup? Download a backup first if you want to keep the current data."))return;
+  var nextRaw=JSON.stringify(next);
+  // Write before changing the visible state. A failed write leaves it untouched.
+  localStorage.setItem(KEY,nextRaw);savedRaw=nextRaw;lastGood=nextRaw;S=next;saveBlocked=false;
+  clearInterval(T.id);T.id=null;T.mode="focus";T.left=T.len*60;Q.st="setup";
+  statusMessage("Backup restored successfully. Saved on this browser only.");
+  $("reload-data").hidden=true;head();show("today");
+ }catch(e){statusMessage("Restore failed. Current dashboard was not replaced. "+e.message)}
+ finally{$("backup-file").value=""}
+}
+$("export-data").addEventListener("click",downloadBackup);
+$("restore-data").addEventListener("click",function(){$("backup-file").click()});
+$("backup-file").addEventListener("change",function(e){restoreBackup(e.target.files[0])});
+$("reload-data").addEventListener("click",function(){location.reload()});
+window.addEventListener("storage",function(e){if(e.key===KEY||e.key===null){saveBlocked=true;statusMessage("Data changed in another tab. Reload before making more changes.");$("reload-data").hidden=false}});
+window.addEventListener("beforeunload",function(e){if(storageMessage.indexOf("not saved")>=0){e.preventDefault();e.returnValue=""}});
+statusMessage(storageMessage||"Saved on this browser only. Cloud sync is not connected.");
+
+head();show("today");
+</script>
+</body>
+</html>
